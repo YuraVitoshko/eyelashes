@@ -656,11 +656,13 @@ body {
   justify-content: space-between;
   border-bottom: 0.0625rem solid #F3F4F7;
 }
+.item-course-program:last-child {
+  border-bottom: none;
+}
 .item-course-program__header {
   display: grid;
   row-gap: 0.5rem;
   padding-bottom: 1rem;
-  border-bottom: 0.0625rem solid #F3F4F7;
 }
 .item-course-program__subtitle {
   font-weight: 500;
@@ -685,9 +687,7 @@ body {
   display: grid;
   row-gap: 0.75rem;
   padding-bottom: 1.25rem;
-}
-.item-course-program__list:not(:last-child) {
-  border-bottom: 0.0625rem solid #F3F4F7;
+  border-top: 0.0625rem solid #F3F4F7;
 }
 .item-course-program__point {
   display: inline-flex;
@@ -773,7 +773,7 @@ body {
 .nav-video-course-program__btn-mute {
   position: absolute;
   bottom: 0.9375rem;
-  left: 1.875rem;
+  left: 0.9375rem;
   width: 1.375rem;
   height: 1.375rem;
 }
@@ -783,7 +783,7 @@ body {
 .nav-video-course-program__fullscreen {
   position: absolute;
   bottom: 0.9375rem;
-  right: 1.875rem;
+  right: 0.9375rem;
   width: 1.375rem;
   height: 1.375rem;
   cursor: pointer;
@@ -2408,7 +2408,7 @@ body {
     border-radius: 1.5rem;
   }
   .what-will-you-get__item.active {
-    border: 0.0625rem solid #C1462D;
+    outline: 0.0625rem solid #C1462D;
   }
   .what-will-you-get__images {
     display: grid;
