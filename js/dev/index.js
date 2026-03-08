@@ -311,12 +311,12 @@ document.addEventListener("DOMContentLoaded", () => {
     update2();
     viewer.style.display = "block";
     viewer.classList.add("active");
-    document.body.style.overflow = "hidden";
+    document.documentElement.setAttribute("data-fls-scrolllock", "");
   }
   function close() {
     viewer.classList.remove("active");
     viewer.style.display = "none";
-    document.body.style.overflow = "";
+    document.documentElement.removeAttribute("data-fls-scrolllock");
   }
   previews.forEach((img, i) => {
     img.addEventListener("click", () => open(i));
