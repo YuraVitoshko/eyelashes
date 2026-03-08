@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const images = document.querySelectorAll(".what-will-you-get__img");
   function update2() {
     let activeIndex = 0;
-    const trigger = window.innerHeight * 0.35;
+    const trigger = window.innerHeight * 0.8;
     images.forEach((img, index) => {
       const rect = img.getBoundingClientRect();
       if (rect.top <= trigger) {
