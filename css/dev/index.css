@@ -394,6 +394,20 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
 }
+.who-is-the-course__item:nth-child(1), .who-is-the-course__item:nth-child(2) {
+  transition: opacity 0.7s, transform 0.7s;
+}
+.who-is-the-course__item:nth-child(3), .who-is-the-course__item:nth-child(4) {
+  transition: opacity 0.7s 0.1s, transform 0.7s 0.1s;
+}
+.who-is-the-course__item {
+  opacity: 0;
+  transform: translateY(10%);
+}
+.who-is-the-course__item.--watcher-view {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 .item-who {
   background: linear-gradient(135deg, rgba(252, 250, 239, 0.5) 0%, #eae5c5 100%);
@@ -451,15 +465,6 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
-}
-.why__item {
-  opacity: 0;
-  transform: translateY(5%);
-  transition: opacity 0.7s, transform 0.7s;
-}
-.why__item.--watcher-view {
-  opacity: 1;
-  transform: translateY(0);
 }
 .why__item:nth-child(3) {
   grid-column-start: 3;
@@ -2479,13 +2484,6 @@ body {
   }
   .who-is-the-course__list {
     grid-template-columns: auto;
-    opacity: 0;
-    transform: translateY(10%);
-    transition: opacity 0.7s, transform 0.7s;
-  }
-  .who-is-the-course__list.--watcher-view {
-    opacity: 1;
-    transform: translateY(0);
   }
   .item-who:nth-child(1) {
     order: 1;
@@ -2507,6 +2505,7 @@ body {
   .why__list {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
     padding-bottom: 0.75rem;
   }
   .why__list::-webkit-scrollbar {
@@ -2519,6 +2518,15 @@ body {
   }
   .why__list::-webkit-scrollbar-track {
     background-color: #FAFAFA;
+  }
+  .why__list {
+    opacity: 0;
+    transform: translateY(10%);
+    transition: opacity 0.7s, transform 0.7s;
+  }
+  .why__list.--watcher-view {
+    opacity: 1;
+    transform: translateY(0);
   }
   .why__item {
     min-width: 75%;
@@ -2842,17 +2850,12 @@ body {
 }
 
 @media (min-width: 767.98){
-  .who-is-the-course__item:nth-child(1), .who-is-the-course__item:nth-child(2) {
+  .why__item {
+    opacity: 0;
+    transform: translateY(5%);
     transition: opacity 0.7s, transform 0.7s;
   }
-  .who-is-the-course__item:nth-child(3), .who-is-the-course__item:nth-child(4) {
-    transition: opacity 0.7s 0.1s, transform 0.7s 0.1s;
-  }
-  .who-is-the-course__item {
-    opacity: 0;
-    transform: translateY(10%);
-  }
-  .who-is-the-course__item.--watcher-view {
+  .why__item.--watcher-view {
     opacity: 1;
     transform: translateY(0);
   }
