@@ -71,10 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let hideTimeout;
   video.muted = true;
   pauseBtn.style.display = "none";
-  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-    video.controls = true;
-    nav.style.display = "none";
-  }
   nav.classList.add("hidden");
   function showControls() {
     clearTimeout(hideTimeout);
