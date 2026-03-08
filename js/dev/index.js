@@ -1,4 +1,4 @@
-import { d as dataMediaQueries, s as slideToggle, a as slideUp, b as slideDown, c as bodyLockToggle, e as bodyLockStatus } from "./common.min.js";
+import { d as dataMediaQueries, s as slideToggle, a as slideUp, b as slideDown, c as bodyLockToggle, e as bodyLockStatus, g as getDigFormat, u as uniqArray } from "./common.min.js";
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) return;
@@ -31,15 +31,33 @@ import { d as dataMediaQueries, s as slideToggle, a as slideUp, b as slideDown, 
 document.addEventListener("DOMContentLoaded", () => {
   const btnUp = document.querySelector(".btn-up");
   if (!btnUp) return;
-  window.addEventListener("scroll", () => {
+  const media = window.matchMedia("(min-width: 769px)");
+  function initBtnUp() {
+    if (!media.matches) {
+      btnUp.classList.remove("active");
+      return;
+    }
     if (window.scrollY > 300) {
       btnUp.classList.add("active");
     } else {
       btnUp.classList.remove("active");
     }
-  });
+  }
+  window.addEventListener("scroll", initBtnUp);
   btnUp.addEventListener("click", () => {
+    if (!media.matches) return;
     window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
+document.addEventListener("DOMContentLoaded", () => {
+  const btnFixed = document.querySelector(".fixed-btn");
+  if (!btnFixed) return;
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 120) {
+      btnFixed.classList.add("active");
+    } else {
+      btnFixed.classList.remove("active");
+    }
   });
 });
 document.addEventListener("DOMContentLoaded", () => {
@@ -49,8 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const playBtn = videoBlock.querySelector(".nav-video__btn-play");
   const pauseBtn = videoBlock.querySelector(".nav-video__btn-pause");
   const muteBtn = videoBlock.querySelector(".nav-video__btn-mute");
-  const fullscreenBtn = videoBlock.querySelector(".nav-video__btn-fullscreen");
-  const fullscreenIcon = fullscreenBtn.querySelector("img");
   const muteIcon = muteBtn.querySelector("img");
   let hideTimeout;
   video.muted = true;
@@ -63,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function showControls() {
     clearTimeout(hideTimeout);
     nav.classList.remove("hidden");
-    if (!video.paused && document.fullscreenElement === videoBlock) {
+    if (!video.paused) {
       hideTimeout = setTimeout(() => nav.classList.add("hidden"), 2e3);
     }
   }
@@ -100,28 +116,12 @@ document.addEventListener("DOMContentLoaded", () => {
     video.muted = !video.muted;
     muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
   });
-  fullscreenBtn.addEventListener("click", () => {
-    if (document.fullscreenElement === videoBlock) document.exitFullscreen();
-    else videoBlock.requestFullscreen?.();
-  });
   videoBlock.addEventListener("mouseenter", showControls);
   videoBlock.addEventListener("mousemove", showControls);
   videoBlock.addEventListener("mouseleave", hideControls);
   videoBlock.addEventListener("touchstart", () => {
     if (nav.classList.contains("hidden")) showControls();
     else nav.classList.add("hidden");
-  });
-  document.addEventListener("fullscreenchange", () => {
-    if (document.fullscreenElement === videoBlock) {
-      fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg";
-      video.style.objectFit = "contain";
-      hideTimeout = setTimeout(() => nav.classList.add("hidden"), 2e3);
-    } else {
-      fullscreenIcon.src = "assets/img/icons/fullscreen.svg";
-      video.style.objectFit = "cover";
-      nav.classList.add("hidden");
-      clearTimeout(hideTimeout);
-    }
   });
 });
 document.addEventListener("DOMContentLoaded", () => {
@@ -307,6 +307,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     dots[current].classList.add("active");
+    prev.classList.toggle("disabled", current === 0);
+    next.classList.toggle("disabled", current === images.length - 1);
   }
   function open(index) {
     current = index;
@@ -324,13 +326,13 @@ document.addEventListener("DOMContentLoaded", () => {
     img.addEventListener("click", () => open(i));
   });
   next.addEventListener("click", () => {
+    if (current >= images.length - 1) return;
     current++;
-    if (current >= images.length) current = 0;
     update2();
   });
   prev.addEventListener("click", () => {
+    if (current <= 0) return;
     current--;
-    if (current < 0) current = images.length - 1;
     update2();
   });
   overlay.addEventListener("click", close);
@@ -341,8 +343,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   image.addEventListener("touchend", (e) => {
     const endX = e.changedTouches[0].clientX;
-    if (startX - endX > 50) next.click();
-    if (endX - startX > 50) prev.click();
+    if (startX - endX > 50 && current < images.length - 1) next.click();
+    if (endX - startX > 50 && current > 0) prev.click();
   });
 });
 function spollers() {
@@ -560,7 +562,7 @@ const ssrWindow = {
     back() {
     }
   },
-  CustomEvent: function CustomEvent() {
+  CustomEvent: function CustomEvent2() {
     return this;
   },
   addEventListener() {
@@ -5575,3 +5577,163 @@ class DynamicAdapt {
 if (document.querySelector("[data-fls-dynamic]")) {
   window.addEventListener("load", () => window.flsDynamic = new DynamicAdapt());
 }
+function digitsCounter() {
+  function digitsCountersInit(digitsCountersItems) {
+    let digitsCounters = digitsCountersItems ? digitsCountersItems : document.querySelectorAll("[data-fls-digcounter]");
+    if (digitsCounters.length) {
+      digitsCounters.forEach((digitsCounter2) => {
+        if (digitsCounter2.hasAttribute("data-fls-digcounter-go")) return;
+        digitsCounter2.setAttribute("data-fls-digcounter-go", "");
+        digitsCounter2.dataset.flsDigcounter = digitsCounter2.innerHTML;
+        digitsCounter2.innerHTML = `0`;
+        digitsCountersAnimate(digitsCounter2);
+      });
+    }
+  }
+  function digitsCountersAnimate(digitsCounter2) {
+    let startTimestamp = null;
+    const duration = parseFloat(digitsCounter2.dataset.flsDigcounterSpeed) ? parseFloat(digitsCounter2.dataset.flsDigcounterSpeed) : 1500;
+    const startValue = parseFloat(digitsCounter2.dataset.flsDigcounter);
+    const format = digitsCounter2.dataset.flsDigcounterFormat ? digitsCounter2.dataset.flsDigcounterFormat : " ";
+    const startPosition = 0;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (startPosition + startValue));
+      digitsCounter2.innerHTML = typeof digitsCounter2.dataset.flsDigcounterFormat !== "undefined" ? getDigFormat(value, format) : value;
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        digitsCounter2.removeAttribute("data-fls-digcounter-go");
+      }
+    };
+    window.requestAnimationFrame(step);
+  }
+  function digitsCounterAction(e) {
+    const entry = e.detail.entry;
+    const targetElement = entry.target;
+    if (targetElement.querySelectorAll("[data-fls-digcounter]").length && !targetElement.querySelectorAll("[data-fls-watcher]").length && entry.isIntersecting) {
+      digitsCountersInit(targetElement.querySelectorAll("[data-fls-digcounter]"));
+    }
+  }
+  document.addEventListener("watcherCallback", digitsCounterAction);
+}
+document.querySelector("[data-fls-digcounter]") ? window.addEventListener("load", digitsCounter) : null;
+class ScrollWatcher {
+  constructor(props) {
+    let defaultConfig = {
+      logging: true
+    };
+    this.config = Object.assign(defaultConfig, props);
+    this.observer;
+    !document.documentElement.hasAttribute("data-fls-watch") ? this.scrollWatcherRun() : null;
+  }
+  // Оновлюємо конструктор
+  scrollWatcherUpdate() {
+    this.scrollWatcherRun();
+  }
+  // Запускаємо конструктор
+  scrollWatcherRun() {
+    document.documentElement.setAttribute("data-fls-watch", "");
+    this.scrollWatcherConstructor(document.querySelectorAll("[data-fls-watcher]"));
+  }
+  // Конструктор спостерігачів
+  scrollWatcherConstructor(items) {
+    if (items.length) {
+      let uniqParams = uniqArray(Array.from(items).map(function(item) {
+        if (item.dataset.flsWatcher === "navigator" && !item.dataset.flsWatcherThreshold) {
+          let valueOfThreshold;
+          if (item.clientHeight > 2) {
+            valueOfThreshold = window.innerHeight / 2 / (item.clientHeight - 1);
+            if (valueOfThreshold > 1) {
+              valueOfThreshold = 1;
+            }
+          } else {
+            valueOfThreshold = 1;
+          }
+          item.setAttribute(
+            "data-fls-watcher-threshold",
+            valueOfThreshold.toFixed(2)
+          );
+        }
+        return `${item.dataset.flsWatcherRoot ? item.dataset.flsWatcherRoot : null}|${item.dataset.flsWatcherMargin ? item.dataset.flsWatcherMargin : "0px"}|${item.dataset.flsWatcherThreshold ? item.dataset.flsWatcherThreshold : 0}`;
+      }));
+      uniqParams.forEach((uniqParam) => {
+        let uniqParamArray = uniqParam.split("|");
+        let paramsWatch = {
+          root: uniqParamArray[0],
+          margin: uniqParamArray[1],
+          threshold: uniqParamArray[2]
+        };
+        let groupItems = Array.from(items).filter(function(item) {
+          let watchRoot = item.dataset.flsWatcherRoot ? item.dataset.flsWatcherRoot : null;
+          let watchMargin = item.dataset.flsWatcherMargin ? item.dataset.flsWatcherMargin : "0px";
+          let watchThreshold = item.dataset.flsWatcherThreshold ? item.dataset.flsWatcherThreshold : 0;
+          if (String(watchRoot) === paramsWatch.root && String(watchMargin) === paramsWatch.margin && String(watchThreshold) === paramsWatch.threshold) {
+            return item;
+          }
+        });
+        let configWatcher = this.getScrollWatcherConfig(paramsWatch);
+        this.scrollWatcherInit(groupItems, configWatcher);
+      });
+    }
+  }
+  // Функція створення налаштувань
+  getScrollWatcherConfig(paramsWatch) {
+    let configWatcher = {};
+    if (document.querySelector(paramsWatch.root)) {
+      configWatcher.root = document.querySelector(paramsWatch.root);
+    } else if (paramsWatch.root !== "null") ;
+    configWatcher.rootMargin = paramsWatch.margin;
+    if (paramsWatch.margin.indexOf("px") < 0 && paramsWatch.margin.indexOf("%") < 0) {
+      return;
+    }
+    if (paramsWatch.threshold === "prx") {
+      paramsWatch.threshold = [];
+      for (let i = 0; i <= 1; i += 5e-3) {
+        paramsWatch.threshold.push(i);
+      }
+    } else {
+      paramsWatch.threshold = paramsWatch.threshold.split(",");
+    }
+    configWatcher.threshold = paramsWatch.threshold;
+    return configWatcher;
+  }
+  // Функція створення нового спостерігача зі своїми налаштуваннями
+  scrollWatcherCreate(configWatcher) {
+    this.observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        this.scrollWatcherCallback(entry, observer);
+      });
+    }, configWatcher);
+  }
+  // Функція ініціалізації спостерігача зі своїми налаштуваннями
+  scrollWatcherInit(items, configWatcher) {
+    this.scrollWatcherCreate(configWatcher);
+    items.forEach((item) => this.observer.observe(item));
+  }
+  // Функція обробки базових дій точок спрацьовування
+  scrollWatcherIntersecting(entry, targetElement) {
+    if (entry.isIntersecting) {
+      !targetElement.classList.contains("--watcher-view") ? targetElement.classList.add("--watcher-view") : null;
+    } else {
+      targetElement.classList.contains("--watcher-view") ? targetElement.classList.remove("--watcher-view") : null;
+    }
+  }
+  // Функція відключення стеження за об'єктом
+  scrollWatcherOff(targetElement, observer) {
+    observer.unobserve(targetElement);
+  }
+  // Функція обробки спостереження
+  scrollWatcherCallback(entry, observer) {
+    const targetElement = entry.target;
+    this.scrollWatcherIntersecting(entry, targetElement);
+    targetElement.hasAttribute("data-fls-watcher-once") && entry.isIntersecting ? this.scrollWatcherOff(targetElement, observer) : null;
+    document.dispatchEvent(new CustomEvent("watcherCallback", {
+      detail: {
+        entry
+      }
+    }));
+  }
+}
+document.querySelector("[data-fls-watcher]") ? window.addEventListener("load", () => new ScrollWatcher({})) : null;

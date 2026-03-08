@@ -5,9 +5,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="shortcut icon" href="./assets/img/favicon.ico">
 		<title>Home Page</title>
-		<script type="module" crossorigin="" src="./js/index.min.js?v=1772819407512"></script>
-		<link rel="modulepreload" crossorigin="" href="./js/common.min.js?v=1772819407512">
-		<link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1772819407512">
+		<script type="module" crossorigin="" src="./js/index.min.js?v=1772962149596"></script>
+		<link rel="modulepreload" crossorigin="" href="./js/common.min.js?v=1772962149596">
+		<link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1772962149596">
 	</head>
 	<body>
 		<div class="wrapper">
@@ -100,6 +100,10 @@
 					<div class="btn-up">
 						<img src="./assets/img/icons/arrow.svg" alt="Image">
 					</div>
+					<div class="fixed-btn button">
+						Dołącz do kursu!
+						<img src="./assets/img/icons/arrow.svg" alt="Image">
+					</div>
 					<section class="hero">
 						<div class="hero__box">
 							<div class="hero__container">
@@ -117,6 +121,11 @@
 										Profesjonalny kurs kosmetyczny przedłużania rzęs, podczas którego nauczysz się stylizacji rzęs metodą 1:1 po objętości
 					2D-3D.
 									</div>
+									<ul class="hero__tags">
+										<li class="hero__tag tag">Klasyka + objętości 2–3D</li>
+										<li class="hero__tag tag">System UV</li>
+										<li class="hero__tag tag">Maszynowe przedłużanie rzęs</li>
+									</ul>
 									<ul class="hero__list">
 										<li class="hero__item">
 											<img src="./assets/img/icons/check-green.svg" alt="icon">
@@ -155,23 +164,6 @@
 										</a>
 									</div>
 								</div>
-								<!--
-<div class="hero__video video">
-<div class="video__box">
-<video id="video-player" poster="../../../assets/img/video-poster.png" class="video__item"
-poster="../../../assets/img/poster.png" controlsList="nodownload" loop playsinline muted autoplay preload="metadata">
-<source src="../../../assets/video/hero-video.mp4" type="video/mp4">
-</video>
-<div class="video__nav nav-video is-hidden">
-<button id="play" class="nav-video__btn-play"><img src="@img/icons/play.svg" alt="Play"></button>
-<button id="pause" class="nav-video__btn-pause"><img src="@img/icons/pause.svg" alt="Pause"></button>
-<button id="mute" class="nav-video__btn-mute"><img src="@img/icons/sound-off.svg" alt="Sound-on"></button>
-<button id="fullscreen" class="nav-video__btn-fullscreen"><img src="@img/icons/fullscreen.svg"
-alt="Fullscreen"></button>
-</div>
-</div>
-</div>
--->
 								<div class="hero__video video">
 									<div class="video__box">
 										<video poster="./assets/img/video-poster.png" class="video__item" controlslist="nodownload" loop playsinline="" muted autoplay preload="metadata">
@@ -187,9 +179,7 @@ alt="Fullscreen"></button>
 											<button class="nav-video__btn-mute">
 												<img src="./assets/img/icons/sound-off.svg" alt="Sound-on">
 											</button>
-											<button class="nav-video__btn-fullscreen">
-												<img src="./assets/img/icons/fullscreen.svg" alt="Fullscreen">
-											</button>
+											<!-- <button class="nav-video__btn-fullscreen"><img src="@img/icons/fullscreen.svg" alt="Fullscreen"></button> -->
 										</div>
 									</div>
 								</div>
@@ -314,13 +304,13 @@ alt="Fullscreen"></button>
 										</h2>
 										<div class="header-block__text header-block__text--primary">Top-instruktorka w Educational Beauty Center Warszawa</div>
 									</div>
-									<div class="author__statistic statistic-author">
+									<div data-fls-watcher="" class="author__statistic statistic-author">
 										<div class="statistic-author__column">
-											<span class="statistic-author__value">10+</span>
+											<span data-fls-digcounter="" class="statistic-author__value">10+</span>
 											<div class="statistic-author__info">lat doświadczenia</div>
 										</div>
 										<div class="statistic-author__column">
-											<span class="statistic-author__value">5000+</span>
+											<span data-fls-digcounter="" class="statistic-author__value">5000+</span>
 											<div class="statistic-author__info">zadowolonych klientek</div>
 										</div>
 									</div>
@@ -478,6 +468,7 @@ alt="Fullscreen"></button>
 														</span>
 													</div>
 													<ul class="item-course-program__list">
+														<li class="item-course-program__point item-course-program__point--subtitle">Dodatkowo w wersji PDF otrzymasz:</li>
 														<li class="item-course-program__point">
 															<img src="./assets/img/icons/course-program/01.svg" alt="icon">
 															Skrypt szkoleniowy
@@ -503,23 +494,6 @@ alt="Fullscreen"></button>
 															Zniżki do -20% od sklepów i marek partnerskich
 														</li>
 													</ul>
-													<!--
-<div class="item-course-program__video video-course-program">
-<div class="video-course-program__container video__container">
-<video id="video-player" poster="../../../assets/img/video-poster.png" class="video-course-program____item video__item"
-poster="../../../assets/img/poster.png" controlsList="nodownload" loop playsinline preload="metadata">
-<source src="../../../assets/video/hero-video.mp4" type="video/mp4">
-</video>
-<div class="video-course-program__nav nav-video-course-program video__nav nav-video">
-<button id="play" class="nav-video-course-programbtn-play nav-video__btn-play"><img src="@img/icons/play.svg" alt="Play"></button>
-<button id="pause" class="nav-video-course-program__btn-pause nav-video__btn-pause"><img src="@img/icons/pause.svg" alt="Pause"></button>
-<button id="mute" class="nav-video-course-program__btn-mute nav-video__btn-mute"><img src="@img/icons/sound-off.svg" alt="Sound-on"></button>
-<button id="fullscreen" class="nav-video-course-program__fullscreen nav-video__btn-fullscreen"><img src="@img/icons/fullscreen.svg"
-alt="Fullscreen"></button>
-</div>
-</div>
-</div>
--->
 													<div class="item-course-program__video video-course-program">
 														<div class="video-course-program__box">
 															<video class="video-course-program__item" poster="./assets/img/poster.png" controlslist="nodownload" loop playsinline="" preload="metadata">
@@ -540,6 +514,10 @@ alt="Fullscreen"></button>
 																</button>
 															</div>
 														</div>
+													</div>
+													<div class="item-course-program__info">
+														<img src="./assets/img/icons/i.svg" alt="icon">
+														To fragment pierwszej lekcji z kursu. Pozostałe materiały dostępne są po zakupie szkolenia.
 													</div>
 												</li>
 												<li class="block-course-program__item item-course-program">
@@ -635,6 +613,7 @@ alt="Fullscreen"></button>
 														</span>
 													</div>
 													<ul class="item-course-program__list">
+														<li class="item-course-program__point item-course-program__point--subtitle">Dodatkowo w wersji PDF otrzymasz:</li>
 														<li class="item-course-program__point">
 															<img src="./assets/img/icons/course-program/01.svg" alt="icon">
 															Skrypt szkoleniowy
@@ -719,6 +698,7 @@ alt="Fullscreen"></button>
 														</span>
 													</div>
 													<ul class="item-course-program__list">
+														<li class="item-course-program__point item-course-program__point--subtitle">Dodatkowo w wersji PDF otrzymasz:</li>
 														<li class="item-course-program__point">
 															<img src="./assets/img/icons/course-program/01.svg" alt="icon">
 															Skrypt szkoleniowy
@@ -764,9 +744,9 @@ alt="Fullscreen"></button>
 											</h3>
 											<div class="sticky-course-program__subtitle">Dołącz do kursu i rozpocznij nowy etap swojego życia zawodowego.</div>
 											<div class="sticky-course-program__tags">
-												<div class="sticky-course-program__tag">Сertyfikat ISO po ukończenia</div>
-												<div class="sticky-course-program__tag">Dostęp nazawsze</div>
-												<div class="sticky-course-program__tag">3 Modul</div>
+												<div class="sticky-course-program__tag tag">Сertyfikat ISO po ukończenia</div>
+												<div class="sticky-course-program__tag tag">Dostęp nazawsze</div>
+												<div class="sticky-course-program__tag tag">3 Modul</div>
 											</div>
 											<div class="sticky-course-program__dark-tag">
 												<img src="./assets/img/icons/gift.svg" alt="icon">
@@ -851,6 +831,12 @@ alt="Fullscreen"></button>
 												Gotowe szablony formularzy dla Twoich klientek
 											</div>
 										</li>
+										<li class="what-will-you-get__item item-what item-what--05">
+											<div class="item-what__box">
+												<img src="./assets/img/icons/instagram.svg" alt="icon">
+												Przewodnik “Instagram Beauty Expert” dla stylistek
+											</div>
+										</li>
 									</ul>
 								</div>
 								<div class="what-will-you-get__images">
@@ -864,6 +850,9 @@ alt="Fullscreen"></button>
 										<img src="./assets/img/what-will-you-get/03.png" alt="Image">
 									</div>
 									<div data-fls-dynamic=".item-what--04, 768, 0" class="what-will-you-get__img">
+										<img src="./assets/img/what-will-you-get/04.png" alt="Image">
+									</div>
+									<div data-fls-dynamic=".item-what--05, 768, 0" class="what-will-you-get__img">
 										<img src="./assets/img/what-will-you-get/04.png" alt="Image">
 									</div>
 								</div>
@@ -1127,57 +1116,59 @@ alt="Fullscreen"></button>
 					</section>
 					<section id="faq" class="faq">
 						<div class="faq__container">
-							<div class="faq__header-block header-block">
-								<div class="header-block__subtitle">
-									<img src="./assets/img/icons/rectangle-blue.svg" alt="icon">
-									FAQ
-								</div>
-								<h2 class="header-block__title">Pytania i odpowiedzi</h2>
-								<div class="header-block__text">
-									Masz inne pytanie? Napisz na:
-									<a href="mailto:beautycenter.education@gmail.com">beautycenter.education@gmail.com</a>
-								</div>
-							</div>
-							<div data-fls-spollers="" class="faq__spollers spollers-faq">
-								<details data-fls-spollers-open="" class="spollers-faq__item">
-									<summary class="spollers-faq__title">Mieszkam za granicą, czy mogę kupić kurs jeśli nie mam polskiego konta?</summary>
-									<div class="spollers-faq__body">
-										Tak, możesz skorzystać z dostępnej opcji płatności STRIPE, nawet jeśli mieszkasz za granicą.
+							<div class="faq__box">
+								<div class="faq__header-block header-block">
+									<div class="header-block__subtitle">
+										<img src="./assets/img/icons/rectangle-blue.svg" alt="icon">
+										FAQ
 									</div>
-								</details>
-								<details class="spollers-faq__item">
-									<summary class="spollers-faq__title">
-										Nigdy wcześniej nie miałam do czynienia ze stylizacją rzęs. Czy ten kurs jest dla mnie odpowiedni?
-									</summary>
-									<div class="spollers-faq__body">
-										Absolutnie tak. Kurs został zaprojektowany od podstaw z myślą o osobach początkujących. Zaczynamy od absolutnych podstaw
-					– teorii, higieny i omówienia produktów, a następnie krok po kroku przechodzimy do praktycznych ćwiczeń. Dzięki formie
-					wideo możesz wracać do każdej lekcji tyle razy, ile potrzebujesz, ucząc się we własnym tempie.
-									</div>
-								</details>
-								<details class="spollers-faq__item">
-									<summary class="spollers-faq__title">Kiedy otrzymam dostęp do kursu?</summary>
-									<div class="spollers-faq__body">Dostęp do kursu otrzymasz natychmiast po jego zakupie.</div>
-								</details>
-								<details class="spollers-faq__item">
-									<summary class="spollers-faq__title">Jak otrzymam dostęp do kursu?</summary>
-									<div class="spollers-faq__body">
-										Po zakupie kursu wystarczy zalogować się na naszą platformę szkoleniową. Dane do logowania otrzymasz drogą mailową
-					bezpośrednio po zakupie. Będą tam dostępne wszystkie Twoje kursy.
-									</div>
-								</details>
-								<details class="spollers-faq__item">
-									<summary class="spollers-faq__title">Jak długo mam dostęp do materiałów?</summary>
-									<div class="spollers-faq__body">Dostęp 24/7 bez ograniczeń czasowych, na dowolnym urządzeniu.</div>
-								</details>
-								<details class="spollers-faq__item">
-									<summary class="spollers-faq__title">Masz inne pytanie?</summary>
-									<div class="spollers-faq__body">
-										Pisz śmiało na
+									<h2 class="header-block__title">Pytania i odpowiedzi</h2>
+									<div class="header-block__text">
+										Masz inne pytanie? Napisz na:
 										<a href="mailto:beautycenter.education@gmail.com">beautycenter.education@gmail.com</a>
-										. Chętnie pomożemy i udzielimy odpowiedzi na wszystkie Twoje pytania!
 									</div>
-								</details>
+								</div>
+								<div data-fls-spollers="" class="faq__spollers spollers-faq">
+									<details data-fls-spollers-open="" class="spollers-faq__item">
+										<summary class="spollers-faq__title">Mieszkam za granicą, czy mogę kupić kurs jeśli nie mam polskiego konta?</summary>
+										<div class="spollers-faq__body">
+											Tak, możesz skorzystać z dostępnej opcji płatności STRIPE, nawet jeśli mieszkasz za granicą.
+										</div>
+									</details>
+									<details class="spollers-faq__item">
+										<summary class="spollers-faq__title">
+											Nigdy wcześniej nie miałam do czynienia ze stylizacją rzęs. Czy ten kurs jest dla mnie odpowiedni?
+										</summary>
+										<div class="spollers-faq__body">
+											Absolutnie tak. Kurs został zaprojektowany od podstaw z myślą o osobach początkujących. Zaczynamy od absolutnych podstaw
+						– teorii, higieny i omówienia produktów, a następnie krok po kroku przechodzimy do praktycznych ćwiczeń. Dzięki formie
+						wideo możesz wracać do każdej lekcji tyle razy, ile potrzebujesz, ucząc się we własnym tempie.
+										</div>
+									</details>
+									<details class="spollers-faq__item">
+										<summary class="spollers-faq__title">Kiedy otrzymam dostęp do kursu?</summary>
+										<div class="spollers-faq__body">Dostęp do kursu otrzymasz natychmiast po jego zakupie.</div>
+									</details>
+									<details class="spollers-faq__item">
+										<summary class="spollers-faq__title">Jak otrzymam dostęp do kursu?</summary>
+										<div class="spollers-faq__body">
+											Po zakupie kursu wystarczy zalogować się na naszą platformę szkoleniową. Dane do logowania otrzymasz drogą mailową
+						bezpośrednio po zakupie. Będą tam dostępne wszystkie Twoje kursy.
+										</div>
+									</details>
+									<details class="spollers-faq__item">
+										<summary class="spollers-faq__title">Jak długo mam dostęp do materiałów?</summary>
+										<div class="spollers-faq__body">Dostęp 24/7 bez ograniczeń czasowych, na dowolnym urządzeniu.</div>
+									</details>
+									<details class="spollers-faq__item">
+										<summary class="spollers-faq__title">Masz inne pytanie?</summary>
+										<div class="spollers-faq__body">
+											Pisz śmiało na
+											<a href="mailto:beautycenter.education@gmail.com">beautycenter.education@gmail.com</a>
+											. Chętnie pomożemy i udzielimy odpowiedzi na wszystkie Twoje pytania!
+										</div>
+									</details>
+								</div>
 							</div>
 						</div>
 					</section>
