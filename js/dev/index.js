@@ -30,22 +30,39 @@ import { d as dataMediaQueries, s as slideToggle, a as slideUp, b as slideDown, 
 })();
 document.addEventListener("DOMContentLoaded", () => {
   const btnUp = document.querySelector(".btn-up");
+  const footer = document.querySelector(".footer");
   if (!btnUp) return;
-  const media = window.matchMedia("(min-width: 769px)");
-  function initBtnUp() {
-    if (!media.matches) {
-      btnUp.classList.remove("active");
-      return;
-    }
-    if (window.scrollY > 300) {
-      btnUp.classList.add("active");
+  function setActive(show) {
+    if (show) btnUp.classList.add("active");
+    else btnUp.classList.remove("active");
+  }
+  function handleDesktop() {
+    if (window.scrollY > 300) setActive(true);
+    else setActive(false);
+  }
+  function handleMobile() {
+    if (!footer) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        setActive(entry.isIntersecting);
+      });
+    }, { threshold: 0.1 });
+    observer.observe(footer);
+  }
+  function init() {
+    if (window.innerWidth >= 768) {
+      window.addEventListener("scroll", handleDesktop);
+      handleDesktop();
     } else {
-      btnUp.classList.remove("active");
+      handleMobile();
     }
   }
-  window.addEventListener("scroll", initBtnUp);
+  init();
+  window.addEventListener("resize", () => {
+    btnUp.classList.remove("active");
+    init();
+  });
   btnUp.addEventListener("click", () => {
-    if (!media.matches) return;
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 });
@@ -53,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnFixed = document.querySelector(".fixed-btn");
   if (!btnFixed) return;
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 120) {
+    if (window.scrollY > 600) {
       btnFixed.classList.add("active");
     } else {
       btnFixed.classList.remove("active");
@@ -62,51 +79,55 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 document.addEventListener("DOMContentLoaded", () => {
   const videoBlock = document.querySelector(".video__box");
-  if (!videoBlock) return;
   const video = videoBlock.querySelector(".video__item");
   const nav = videoBlock.querySelector(".nav-video");
+  const youtubeVideos = document.querySelectorAll(".video-youtube__iframe");
   const playBtn = videoBlock.querySelector(".nav-video__btn-play");
   const pauseBtn = videoBlock.querySelector(".nav-video__btn-pause");
   const muteBtn = videoBlock.querySelector(".nav-video__btn-mute");
   const muteIcon = muteBtn.querySelector("img");
-  const youtubeIframes = document.querySelectorAll(".item-course-program__video-youtube iframe");
   let hideTimeout;
   video.muted = true;
   pauseBtn.style.display = "none";
-  nav.classList.add("hidden");
-  function pauseYouTubeVideos() {
-    youtubeIframes.forEach((iframe) => {
-      iframe.contentWindow.postMessage(JSON.stringify({
-        event: "command",
-        func: "pauseVideo"
-      }), "*");
-    });
+  function pauseVideo(v) {
+    if (!v) return;
+    if (v.tagName === "VIDEO") {
+      if (!v.paused) v.pause();
+    } else if (v.tagName === "IFRAME") {
+      if (v.contentWindow) {
+        v.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo" }), "*");
+      }
+    }
+  }
+  function pauseYoutubeVideos() {
+    youtubeVideos.forEach((iframe) => pauseVideo(iframe));
+  }
+  function pauseMainVideo() {
+    pauseVideo(video);
+    updateButtons();
   }
   function showControls() {
     clearTimeout(hideTimeout);
     nav.classList.remove("hidden");
-    if (!video.paused) {
-      hideTimeout = setTimeout(() => nav.classList.add("hidden"), 2e3);
-    }
+    if (!video.paused) hideTimeout = setTimeout(() => nav.classList.add("hidden"), 2e3);
   }
   function hideControls() {
     if (!video.paused) nav.classList.add("hidden");
   }
   playBtn.addEventListener("click", () => {
-    pauseYouTubeVideos();
-    document.querySelectorAll(".video-course-program__item").forEach((v) => v.pause());
+    pauseYoutubeVideos();
+    document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     video.play();
     updateButtons();
     showControls();
   });
   pauseBtn.addEventListener("click", () => {
-    video.pause();
-    updateButtons();
+    pauseMainVideo();
     showControls();
   });
   video.addEventListener("play", () => {
-    pauseYouTubeVideos();
-    document.querySelectorAll(".video-course-program__item").forEach((v) => v.pause());
+    pauseYoutubeVideos();
+    document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     updateButtons();
   });
   video.addEventListener("pause", updateButtons);
@@ -131,12 +152,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nav.classList.contains("hidden")) showControls();
     else nav.classList.add("hidden");
   });
-  window.addEventListener("message", (event) => {
-    if (typeof event.data === "string" && event.data.includes("playVideo")) {
-      video.pause();
-      updateButtons();
-    }
-  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) pauseVideo(entry.target);
+    });
+  }, { threshold: 0.25 });
+  observer.observe(video);
+  youtubeVideos.forEach((v) => observer.observe(v));
 });
 document.addEventListener("DOMContentLoaded", () => {
   const items = document.querySelectorAll(".what-will-you-get__item");
@@ -188,29 +210,33 @@ document.addEventListener("DOMContentLoaded", () => {
     function hideControls() {
       if (!video.paused && document.fullscreenElement === videoBlock) nav.classList.add("hidden");
     }
+    function pauseVideo(v) {
+      if (!v) return;
+      if (v.tagName === "VIDEO") {
+        if (!v.paused) v.pause();
+      } else if (v.tagName === "IFRAME" && v.contentWindow) {
+        v.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo" }), "*");
+      }
+    }
     playBtn.addEventListener("click", () => {
       videos.forEach((vb) => {
         const otherVideo = vb.querySelector(".video-course-program__item");
-        if (otherVideo !== video) otherVideo.pause();
+        if (otherVideo !== video) pauseVideo(otherVideo);
       });
-      const mainVideo = document.querySelector(".video__item");
-      if (mainVideo && !mainVideo.paused) mainVideo.pause();
       video.play();
       updateButtons();
       showControls();
     });
     pauseBtn.addEventListener("click", () => {
-      video.pause();
+      pauseVideo(video);
       updateButtons();
       showControls();
     });
     video.addEventListener("play", () => {
       videos.forEach((vb) => {
         const otherVideo = vb.querySelector(".video-course-program__item");
-        if (otherVideo !== video) otherVideo.pause();
+        if (otherVideo !== video) pauseVideo(otherVideo);
       });
-      const mainVideo = document.querySelector(".video__item");
-      if (mainVideo && !mainVideo.paused) mainVideo.pause();
       updateButtons();
     });
     video.addEventListener("pause", updateButtons);
@@ -251,6 +277,12 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(hideTimeout);
       }
     });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) pauseVideo(entry.target);
+      });
+    }, { threshold: 0.25 });
+    observer.observe(video);
   });
 });
 document.addEventListener("DOMContentLoaded", () => {
@@ -329,12 +361,12 @@ document.addEventListener("DOMContentLoaded", () => {
     update2();
     viewer.style.display = "block";
     viewer.classList.add("active");
-    document.documentElement.setAttribute("data-fls-scrolllock", "");
+    document.body.style.overflow = "hidden";
   }
   function close() {
     viewer.classList.remove("active");
     viewer.style.display = "none";
-    document.documentElement.removeAttribute("data-fls-scrolllock");
+    document.body.style.overflow = "";
   }
   previews.forEach((img, i) => {
     img.addEventListener("click", () => open(i));
@@ -5751,3 +5783,55 @@ class ScrollWatcher {
   }
 }
 document.querySelector("[data-fls-watcher]") ? window.addEventListener("load", () => new ScrollWatcher({})) : null;
+function preloader() {
+  const preloaderImages = document.querySelectorAll("img");
+  const htmlDocument = document.documentElement;
+  const isPreloaded = localStorage.getItem(location.href) && document.querySelector('[data-fls-preloader="true"]');
+  if (preloaderImages.length && !isPreloaded) {
+    let setValueProgress = function(progress2) {
+      showPecentLoad ? showPecentLoad.innerText = `${progress2}%` : null;
+      showLineLoad ? showLineLoad.style.width = `${progress2}%` : null;
+    }, imageLoaded = function() {
+      imagesLoadedCount++;
+      progress = Math.round(100 / preloaderImages.length * imagesLoadedCount);
+      const intervalId = setInterval(() => {
+        counter >= progress ? clearInterval(intervalId) : setValueProgress(++counter);
+        counter >= 100 ? addLoadedClass() : null;
+      }, 10);
+    };
+    const preloaderTemplate = `
+			<div class="fls-preloader">
+				<div class="fls-preloader__body">
+					<div class="fls-preloader__counter">0%</div>
+					<div class="fls-preloader__line"><span></span></div>
+				</div>
+			</div>`;
+    document.body.insertAdjacentHTML("beforeend", preloaderTemplate);
+    document.querySelector(".fls-preloader");
+    const showPecentLoad = document.querySelector(".fls-preloader__counter"), showLineLoad = document.querySelector(".fls-preloader__line span");
+    let imagesLoadedCount = 0;
+    let counter = 0;
+    let progress = 0;
+    htmlDocument.setAttribute("data-fls-preloader-loading", "");
+    htmlDocument.setAttribute("data-fls-scrolllock", "");
+    preloaderImages.forEach((preloaderImage) => {
+      const imgClone = document.createElement("img");
+      if (imgClone) {
+        imgClone.onload = imageLoaded;
+        imgClone.onerror = imageLoaded;
+        preloaderImage.dataset.src ? imgClone.src = preloaderImage.dataset.src : imgClone.src = preloaderImage.src;
+      }
+    });
+    setValueProgress(progress);
+    const preloaderOnce = () => localStorage.setItem(location.href, "preloaded");
+    document.querySelector('[data-fls-preloader="true"]') ? preloaderOnce() : null;
+  } else {
+    addLoadedClass();
+  }
+  function addLoadedClass() {
+    htmlDocument.setAttribute("data-fls-preloader-loaded", "");
+    htmlDocument.removeAttribute("data-fls-preloader-loading");
+    htmlDocument.removeAttribute("data-fls-scrolllock");
+  }
+}
+document.addEventListener("DOMContentLoaded", preloader);
