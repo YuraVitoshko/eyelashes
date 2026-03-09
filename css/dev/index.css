@@ -943,17 +943,19 @@ body {
   color: #24292E;
 }
 .item-course-program__video-youtube {
-  aspect-ratio: 320/220;
-  max-height: 13.75rem;
-}
-.item-course-program__video-youtube iframe {
+  position: relative;
+  width: 100%;
+  max-width: 20rem;
   border-radius: 1.5rem;
   overflow: hidden;
-  max-width: 20rem;
+  aspect-ratio: 320/220;
+}
+.item-course-program__video-youtube iframe {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-height: 13.75rem;
   height: 100%;
-  object-fit: contain;
+  border: 0;
 }
 .item-course-program__icon {
   flex: 0 0 0.875rem;
@@ -2687,11 +2689,6 @@ body {
   }
   .item-course-program__video-youtube {
     max-width: 100%;
-    max-height: 100%;
-  }
-  .item-course-program__video-youtube iframe {
-    max-width: 100%;
-    max-height: 100%;
   }
   .video-course-program {
     max-width: 100%;
