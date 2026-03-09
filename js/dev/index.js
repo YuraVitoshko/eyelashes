@@ -62,16 +62,26 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 document.addEventListener("DOMContentLoaded", () => {
   const videoBlock = document.querySelector(".video__box");
+  if (!videoBlock) return;
   const video = videoBlock.querySelector(".video__item");
   const nav = videoBlock.querySelector(".nav-video");
   const playBtn = videoBlock.querySelector(".nav-video__btn-play");
   const pauseBtn = videoBlock.querySelector(".nav-video__btn-pause");
   const muteBtn = videoBlock.querySelector(".nav-video__btn-mute");
   const muteIcon = muteBtn.querySelector("img");
+  const youtubeIframes = document.querySelectorAll(".item-course-program__video-youtube iframe");
   let hideTimeout;
   video.muted = true;
   pauseBtn.style.display = "none";
   nav.classList.add("hidden");
+  function pauseYouTubeVideos() {
+    youtubeIframes.forEach((iframe) => {
+      iframe.contentWindow.postMessage(JSON.stringify({
+        event: "command",
+        func: "pauseVideo"
+      }), "*");
+    });
+  }
   function showControls() {
     clearTimeout(hideTimeout);
     nav.classList.remove("hidden");
@@ -83,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!video.paused) nav.classList.add("hidden");
   }
   playBtn.addEventListener("click", () => {
+    pauseYouTubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => v.pause());
     video.play();
     updateButtons();
@@ -94,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showControls();
   });
   video.addEventListener("play", () => {
+    pauseYouTubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => v.pause());
     updateButtons();
   });
@@ -118,6 +130,12 @@ document.addEventListener("DOMContentLoaded", () => {
   videoBlock.addEventListener("touchstart", () => {
     if (nav.classList.contains("hidden")) showControls();
     else nav.classList.add("hidden");
+  });
+  window.addEventListener("message", (event) => {
+    if (typeof event.data === "string" && event.data.includes("playVideo")) {
+      video.pause();
+      updateButtons();
+    }
   });
 });
 document.addEventListener("DOMContentLoaded", () => {
