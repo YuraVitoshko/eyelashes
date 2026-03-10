@@ -8,11 +8,11 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="shortcut icon" href="./assets/img/favicon.ico">
 		<title>Home Page</title>
-		<script type="module" crossorigin="" src="./js/index.min.js?v=1773149037686"></script>
-		<link rel="modulepreload" crossorigin="" href="./js/common.min.js?v=1773149037686">
-		<link rel="modulepreload" crossorigin="" href="./js/main.min.js?v=1773149037686">
-		<link rel="stylesheet" crossorigin="" href="./css/main.min.css?v=1773149037686">
-		<link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1773149037686">
+		<script type="module" crossorigin="" src="./js/index.min.js?v=1773149857281"></script>
+		<link rel="modulepreload" crossorigin="" href="./js/common.min.js?v=1773149857281">
+		<link rel="modulepreload" crossorigin="" href="./js/main.min.js?v=1773149857281">
+		<link rel="stylesheet" crossorigin="" href="./css/main.min.css?v=1773149857281">
+		<link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1773149857281">
 	</head>
 	<body>
 		<div class="wrapper">
@@ -89,6 +89,7 @@
 						</nav>
 					</div>
 					<div class="header__actions">
+						<!-- <a href="#contacts" data-fls-button class="header__button button">Kupuję kurs</a> -->
 						<a href="#" data-fls-button="" class="header__button button">
 							Kupuję kurs
 							<img src="./assets/img/icons/arrow.svg" alt="arrow">
@@ -183,6 +184,7 @@
 											<button class="nav-video__btn-mute">
 												<img src="./assets/img/icons/sound-off.svg" alt="Sound-on">
 											</button>
+											<!-- <button class="nav-video__btn-fullscreen"><img src="@img/icons/fullscreen.svg" alt="Fullscreen"></button> -->
 										</div>
 									</div>
 								</div>
@@ -725,8 +727,8 @@
 													</ul>
 													<div class="item-course-program__video video-course-program">
 														<div class="video-course-program__box">
-															<video class="video-course-program__item" poster="./assets/img/poster.png" controlslist="nodownload" loop playsinline="" preload="metadata">
-																<source src="./assets/video/hero-video.mp4" type="video/mp4">
+															<video class="video-course-program__item" poster="../../../assets/img/poster.png" controlslist="nodownload" loop playsinline="" preload="metadata">
+																<source src="../../../assets/video/hero-video.mp4" type="video/mp4">
 															</video>
 															<div class="video-course-program__nav nav-video-course-program">
 																<button class="nav-video-course-program__btn-play">
@@ -1281,7 +1283,14 @@
 					</div>
 					<div class="footer__bottom">
 						<div class="footer__copy">Copyright © 2023-2026 Educational Beauty Center. Wszystkie prawa zastrzeżone.</div>
-						<a href="#" class="footer__all">Polityka prywatności i regulamin</a>
+						<div class="footer__actions actions-footer">
+							<div class="actions-footer__item">
+								<a href="privacy-cookies.html" class="actions-footer__link">Polityka cookies</a>
+							</div>
+							<div class="actions-footer__item">
+								<a href="privacy-policy.html" class="actions-footer__link">Polityka prywatności i regulamin</a>
+							</div>
+						</div>
 					</div>
 				</div>
 			</footer>

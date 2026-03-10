@@ -302,7 +302,18 @@ body {
   color: #596066;
   text-align: center;
 }
-.footer__all {
+.actions-footer {
+  display: flex;
+  justify-content: center;
+}
+.actions-footer__item:nth-child(1) {
+  padding-right: 0.75rem;
+  border-right: 0.0625rem solid #596066;
+}
+.actions-footer__item:nth-child(2) {
+  padding-left: 0.75rem;
+}
+.actions-footer__link {
   font-size: 0.875rem;
   line-height: 1.4;
   text-decoration: underline;
@@ -633,7 +644,7 @@ body {
   .menu__link:hover {
     color: #E35336;
   }
-  .footer__all:hover {
+  .actions-footer__link:hover {
     color: #E35336;
   }
   .social-footer__link:hover svg path {
