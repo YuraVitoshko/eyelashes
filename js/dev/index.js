@@ -373,6 +373,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (endX - startX > 50 && current > 0) prev.click();
   });
 });
+document.addEventListener("DOMContentLoaded", () => {
+  function setEqualHeight() {
+    const items = document.querySelectorAll(".who-is-the-course__item");
+    let maxHeight = 0;
+    items.forEach((item) => {
+      item.style.height = "auto";
+    });
+    items.forEach((item) => {
+      const height = item.offsetHeight;
+      if (height > maxHeight) {
+        maxHeight = height;
+      }
+    });
+    items.forEach((item) => {
+      item.style.height = maxHeight + "px";
+    });
+  }
+  setEqualHeight();
+  window.addEventListener("resize", setEqualHeight);
+});
 function spollers() {
   const spollersArray = document.querySelectorAll("[data-fls-spollers]");
   if (spollersArray.length > 0) {

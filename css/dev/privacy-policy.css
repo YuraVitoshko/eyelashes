@@ -30,9 +30,9 @@
 }
 .privacy-policy__box:nth-child(1) {
   padding-bottom: 3.75rem;
-  border-bottom: 0.0625rem solid #E5E7EA;
 }
 .privacy-policy__box:nth-child(2) {
+  border-top: 0.0625rem solid #E5E7EA;
   padding-top: 3.75rem;
 }
 .bradcrumbs__list {
