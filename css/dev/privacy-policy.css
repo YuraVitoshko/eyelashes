@@ -35,6 +35,9 @@
   border-top: 0.0625rem solid #E5E7EA;
   padding-top: 3.75rem;
 }
+.privacy-policy__box--pb {
+  padding-bottom: 0 !important;
+}
 .bradcrumbs__list {
   display: flex;
   align-items: center;
