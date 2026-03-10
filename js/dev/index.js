@@ -29,6 +29,14 @@ import { d as dataMediaQueries, s as slideToggle, a as slideUp, b as slideDown, 
   }
 })();
 document.addEventListener("DOMContentLoaded", () => {
+  const button = document.querySelector(".actions-menu__button");
+  button.addEventListener("touchstart", () => {
+    const html = document.documentElement;
+    html.removeAttribute("data-fls-scrolllock");
+    html.removeAttribute("data-fls-menu-open");
+  });
+});
+document.addEventListener("DOMContentLoaded", () => {
   const btnUp = document.querySelector(".btn-up");
   const footer = document.querySelector(".footer");
   if (!btnUp) return;

@@ -2362,7 +2362,7 @@ body {
   }
   .menu {
     position: fixed;
-    z-index: 3;
+    z-index: 50;
     width: 100%;
     height: 100svh;
     right: -100%;
@@ -2482,7 +2482,7 @@ body {
     display: inline-flex !important;
     text-wrap: nowrap;
     position: fixed;
-    z-index: 100;
+    z-index: 45;
     bottom: 0.625rem;
     left: 50%;
     transform: translate(-50%);
@@ -2545,7 +2545,6 @@ body {
   }
   .why__container {
     row-gap: 2rem;
-    padding-right: 0;
   }
   .why__list {
     display: flex;
@@ -2732,6 +2731,7 @@ body {
   .payment-methods-course-program {
     flex-wrap: nowrap;
     overflow-x: auto;
+    justify-content: start;
   }
   .what-will-you-get__container {
     row-gap: 2rem;
@@ -2832,6 +2832,9 @@ body {
   .footer__column:not(:first-child) {
     padding-left: 0;
     padding-top: 2rem;
+  }
+  .fls-preloader__counter {
+    font-size: 8rem;
   }
   .header-block__title {
     font-size: 1.625rem;
