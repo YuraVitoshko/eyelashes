@@ -123,20 +123,20 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     video.play();
     updateButtons();
-    if (isMobile()) {
-      hideControls(200);
-    }
+    if (isMobile()) hideControls(0);
   });
   pauseBtn?.addEventListener("click", () => {
     video.pause();
     updateButtons();
+    showControls();
+    controlsLocked = true;
   });
   video.addEventListener("play", () => {
     pauseYoutubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     updateButtons();
     if (isMobile()) {
-      if (!controlsLocked) hideControls(200);
+      if (!controlsLocked) hideControls(0);
     } else if (document.fullscreenElement === videoBlock) {
       hideControls(2e3);
     } else {
@@ -145,9 +145,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   video.addEventListener("pause", () => {
     updateButtons();
-    controlsLocked = false;
     clearTimeout(hideTimeout);
     showControls();
+    controlsLocked = true;
   });
   muteBtn?.addEventListener("click", () => {
     video.muted = !video.muted;
@@ -158,25 +158,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!isMobile()) {
     videoBlock.addEventListener("mouseenter", showControls);
     videoBlock.addEventListener("mouseleave", () => {
-      if (!video.paused && document.fullscreenElement !== videoBlock) {
-        hideControls();
-      }
+      if (!video.paused && document.fullscreenElement !== videoBlock) hideControls();
     });
     videoBlock.addEventListener("mousemove", () => {
-      if (document.fullscreenElement === videoBlock) {
-        handleFullscreenControls();
-      }
+      if (document.fullscreenElement === videoBlock) handleFullscreenControls();
     });
   }
   if (isMobile()) {
     videoBlock.addEventListener("touchstart", () => {
-      if (nav?.classList.contains("hidden")) {
-        controlsLocked = false;
-        showControls();
-      } else {
-        controlsLocked = true;
-        showControls();
-      }
+      if (video.paused) return;
+      showControls();
+      controlsLocked = true;
+      clearTimeout(hideTimeout);
     });
   }
   fullscreenBtn?.addEventListener("click", () => {
@@ -200,9 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) {
-        pauseVideo(entry.target);
-      }
+      if (!entry.isIntersecting) pauseVideo(entry.target);
     });
   }, { threshold: 0.25 });
   observer.observe(video);
@@ -244,7 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const muteIcon = muteBtn?.querySelector("img");
     let hideTimeout;
     let controlsLocked = false;
-    let justTapped = false;
     video.muted = true;
     pauseBtn.style.display = "none";
     nav.classList.add("hidden");
@@ -291,33 +281,24 @@ document.addEventListener("DOMContentLoaded", () => {
         pauseBtn.style.display = "block";
       }
     }
-    function handleFullscreenControls() {
-      if (document.fullscreenElement !== videoBlock) return;
-      showControls();
-      hideControls(2e3);
-    }
     playBtn.addEventListener("click", () => {
       controlsLocked = false;
       pauseOtherVideos();
       video.play();
       updateButtons();
-      if (isMobile()) {
-        hideControls(200);
-      }
+      if (isMobile()) hideControls(0);
     });
     pauseBtn.addEventListener("click", () => {
       video.pause();
       updateButtons();
+      showControls();
+      controlsLocked = true;
     });
     video.addEventListener("play", () => {
       pauseOtherVideos();
       updateButtons();
       if (isMobile()) {
-        if (justTapped) {
-          justTapped = false;
-          return;
-        }
-        if (!controlsLocked) hideControls(200);
+        if (!controlsLocked) hideControls(0);
       } else if (document.fullscreenElement === videoBlock) {
         hideControls(2e3);
       } else {
@@ -326,42 +307,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     video.addEventListener("pause", () => {
       updateButtons();
-      controlsLocked = false;
-      justTapped = false;
       clearTimeout(hideTimeout);
       showControls();
+      controlsLocked = true;
     });
-    muteBtn.addEventListener("click", () => {
-      video.muted = !video.muted;
-      muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
-    });
-    if (!isMobile()) {
-      videoBlock.addEventListener("mouseenter", showControls);
-      videoBlock.addEventListener("mouseleave", () => {
-        if (!video.paused && document.fullscreenElement !== videoBlock) {
-          hideControls();
-        }
-      });
-      videoBlock.addEventListener("mousemove", () => {
-        if (document.fullscreenElement === videoBlock) {
-          handleFullscreenControls();
-        }
-      });
-    }
     if (isMobile()) {
       videoBlock.addEventListener("touchstart", () => {
+        if (video.paused) return;
+        showControls();
+        controlsLocked = true;
         clearTimeout(hideTimeout);
-        if (nav.classList.contains("hidden")) {
-          controlsLocked = false;
-          justTapped = true;
-          showControls();
-        } else {
-          controlsLocked = true;
-          justTapped = true;
-          showControls();
-        }
       });
     }
+    muteBtn.addEventListener("click", () => {
+      video.muted = !video.muted;
+      if (muteIcon) {
+        muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
+      }
+    });
     fullscreenBtn.addEventListener("click", () => {
       if (document.fullscreenElement === videoBlock) {
         document.exitFullscreen();
@@ -383,12 +346,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          pauseVideo(entry.target);
-        }
+        if (!entry.isIntersecting) pauseVideo(entry.target);
       });
     }, { threshold: 0.25 });
     observer.observe(video);
+    if (!isMobile()) {
+      videoBlock.addEventListener("mouseenter", showControls);
+      videoBlock.addEventListener("mouseleave", () => {
+        if (!video.paused && document.fullscreenElement !== videoBlock) hideControls();
+      });
+      videoBlock.addEventListener("mousemove", () => {
+        if (document.fullscreenElement === videoBlock) showControls();
+      });
+    }
   });
 });
 document.addEventListener("DOMContentLoaded", () => {
@@ -403,15 +373,15 @@ document.addEventListener("DOMContentLoaded", () => {
 		<div class="gallery-viewer__overlay"></div>
 
 		<button class="gallery-viewer__close">
-			<img src="./assets/img/icons/close.svg" alt="Close">
+			<img src="/assets/img/icons/close.svg" alt="Close">
 		</button>
 
 		<div class="gallery-viewer__content">
 			<img class="gallery-viewer__image" src="">
 			<div class="gallery-viewer__controls">
-				<button class="gallery-viewer__prev"><img src="./assets/img/icons/arrow-slider.svg" alt="Image"></button>
+				<button class="gallery-viewer__prev"><img src="/assets/img/icons/arrow-slider.svg" alt="Image"></button>
 				<div class="gallery-viewer__dots"></div>
-				<button class="gallery-viewer__next"><img src="./assets/img/icons/arrow-slider.svg" alt="Image"></button>
+				<button class="gallery-viewer__next"><img src="/assets/img/icons/arrow-slider.svg" alt="Image"></button>
 			</div>
 		</div>
 	`;
