@@ -59,59 +59,50 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 document.addEventListener("DOMContentLoaded", () => {
   const videoBlock = document.querySelector(".video__box");
+  if (!videoBlock) return;
   const video = videoBlock.querySelector(".video__item");
   const nav = videoBlock.querySelector(".nav-video");
   const youtubeVideos = document.querySelectorAll(".video-youtube__iframe");
+  const fullscreenBtn = videoBlock.querySelector(".nav-video__btn-fullscreen");
+  const fullscreenIcon = fullscreenBtn?.querySelector("img");
   const playBtn = videoBlock.querySelector(".nav-video__btn-play");
   const pauseBtn = videoBlock.querySelector(".nav-video__btn-pause");
   const muteBtn = videoBlock.querySelector(".nav-video__btn-mute");
-  const muteIcon = muteBtn.querySelector("img");
+  const muteIcon = muteBtn?.querySelector("img");
+  const isMobile = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   let hideTimeout;
+  let controlsLocked = false;
   video.muted = true;
-  pauseBtn.style.display = "none";
+  if (pauseBtn) pauseBtn.style.display = "none";
+  nav?.classList.add("hidden");
   function pauseVideo(v) {
     if (!v) return;
     if (v.tagName === "VIDEO") {
       if (!v.paused) v.pause();
     } else if (v.tagName === "IFRAME") {
-      if (v.contentWindow) {
-        v.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo" }), "*");
-      }
+      v.contentWindow?.postMessage(JSON.stringify({
+        event: "command",
+        func: "pauseVideo"
+      }), "*");
     }
   }
   function pauseYoutubeVideos() {
     youtubeVideos.forEach((iframe) => pauseVideo(iframe));
   }
-  function pauseMainVideo() {
-    pauseVideo(video);
-    updateButtons();
-  }
   function showControls() {
     clearTimeout(hideTimeout);
-    nav.classList.remove("hidden");
-    if (!video.paused) hideTimeout = setTimeout(() => nav.classList.add("hidden"), 2e3);
+    nav?.classList.remove("hidden");
   }
-  function hideControls() {
-    if (!video.paused) nav.classList.add("hidden");
+  function hideControls(delay = 0) {
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+      if (video.paused) return;
+      if (controlsLocked) return;
+      nav?.classList.add("hidden");
+    }, delay);
   }
-  playBtn.addEventListener("click", () => {
-    pauseYoutubeVideos();
-    document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
-    video.play();
-    updateButtons();
-    showControls();
-  });
-  pauseBtn.addEventListener("click", () => {
-    pauseMainVideo();
-    showControls();
-  });
-  video.addEventListener("play", () => {
-    pauseYoutubeVideos();
-    document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
-    updateButtons();
-  });
-  video.addEventListener("pause", updateButtons);
   function updateButtons() {
+    if (!playBtn || !pauseBtn) return;
     if (video.paused) {
       playBtn.style.display = "block";
       pauseBtn.style.display = "none";
@@ -121,20 +112,97 @@ document.addEventListener("DOMContentLoaded", () => {
       pauseBtn.style.display = "block";
     }
   }
-  muteBtn.addEventListener("click", () => {
-    video.muted = !video.muted;
-    muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
+  function handleFullscreenControls() {
+    if (document.fullscreenElement !== videoBlock) return;
+    showControls();
+    hideControls(2e3);
+  }
+  playBtn?.addEventListener("click", () => {
+    controlsLocked = false;
+    pauseYoutubeVideos();
+    document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
+    video.play();
+    updateButtons();
+    if (isMobile()) {
+      hideControls(200);
+    }
   });
-  videoBlock.addEventListener("mouseenter", showControls);
-  videoBlock.addEventListener("mousemove", showControls);
-  videoBlock.addEventListener("mouseleave", hideControls);
-  videoBlock.addEventListener("touchstart", () => {
-    if (nav.classList.contains("hidden")) showControls();
-    else nav.classList.add("hidden");
+  pauseBtn?.addEventListener("click", () => {
+    video.pause();
+    updateButtons();
+  });
+  video.addEventListener("play", () => {
+    pauseYoutubeVideos();
+    document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
+    updateButtons();
+    if (isMobile()) {
+      if (!controlsLocked) hideControls(200);
+    } else if (document.fullscreenElement === videoBlock) {
+      hideControls(2e3);
+    } else {
+      hideControls();
+    }
+  });
+  video.addEventListener("pause", () => {
+    updateButtons();
+    controlsLocked = false;
+    clearTimeout(hideTimeout);
+    showControls();
+  });
+  muteBtn?.addEventListener("click", () => {
+    video.muted = !video.muted;
+    if (muteIcon) {
+      muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
+    }
+  });
+  if (!isMobile()) {
+    videoBlock.addEventListener("mouseenter", showControls);
+    videoBlock.addEventListener("mouseleave", () => {
+      if (!video.paused && document.fullscreenElement !== videoBlock) {
+        hideControls();
+      }
+    });
+    videoBlock.addEventListener("mousemove", () => {
+      if (document.fullscreenElement === videoBlock) {
+        handleFullscreenControls();
+      }
+    });
+  }
+  if (isMobile()) {
+    videoBlock.addEventListener("touchstart", () => {
+      if (nav?.classList.contains("hidden")) {
+        controlsLocked = false;
+        showControls();
+      } else {
+        controlsLocked = true;
+        showControls();
+      }
+    });
+  }
+  fullscreenBtn?.addEventListener("click", () => {
+    if (document.fullscreenElement === videoBlock) {
+      document.exitFullscreen();
+    } else {
+      videoBlock.requestFullscreen?.();
+    }
+  });
+  document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement === videoBlock) {
+      fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg");
+      video.style.objectFit = "contain";
+      showControls();
+      hideControls(2e3);
+    } else {
+      fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
+      video.style.objectFit = "cover";
+      showControls();
+    }
   });
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) pauseVideo(entry.target);
+      if (!entry.isIntersecting) {
+        pauseVideo(entry.target);
+      }
     });
   }, { threshold: 0.25 });
   observer.observe(video);
@@ -164,6 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 document.addEventListener("DOMContentLoaded", () => {
   const videos = document.querySelectorAll(".video-course-program");
+  const isMobile = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   videos.forEach((videoBlock) => {
     const video = videoBlock.querySelector(".video-course-program__item");
     const nav = videoBlock.querySelector(".nav-video-course-program");
@@ -171,95 +240,152 @@ document.addEventListener("DOMContentLoaded", () => {
     const pauseBtn = videoBlock.querySelector(".nav-video-course-program__btn-pause");
     const muteBtn = videoBlock.querySelector(".nav-video-course-program__btn-mute");
     const fullscreenBtn = videoBlock.querySelector(".nav-video-course-program__fullscreen");
-    const fullscreenIcon = fullscreenBtn.querySelector("img");
-    const muteIcon = muteBtn.querySelector("img");
+    const fullscreenIcon = fullscreenBtn?.querySelector("img");
+    const muteIcon = muteBtn?.querySelector("img");
     let hideTimeout;
+    let controlsLocked = false;
+    let justTapped = false;
     video.muted = true;
     pauseBtn.style.display = "none";
+    nav.classList.add("hidden");
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
       video.controls = true;
       nav.style.display = "none";
-    }
-    function showControls() {
-      clearTimeout(hideTimeout);
-      nav.classList.remove("hidden");
-      if (!video.paused && document.fullscreenElement === videoBlock) {
-        hideTimeout = setTimeout(() => nav.classList.add("hidden"), 2e3);
-      }
-    }
-    function hideControls() {
-      if (!video.paused && document.fullscreenElement === videoBlock) nav.classList.add("hidden");
     }
     function pauseVideo(v) {
       if (!v) return;
       if (v.tagName === "VIDEO") {
         if (!v.paused) v.pause();
-      } else if (v.tagName === "IFRAME" && v.contentWindow) {
-        v.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo" }), "*");
+      } else if (v.tagName === "IFRAME") {
+        v.contentWindow?.postMessage(JSON.stringify({
+          event: "command",
+          func: "pauseVideo"
+        }), "*");
       }
     }
-    playBtn.addEventListener("click", () => {
+    function pauseOtherVideos() {
       videos.forEach((vb) => {
-        const otherVideo = vb.querySelector(".video-course-program__item");
-        if (otherVideo !== video) pauseVideo(otherVideo);
+        const other = vb.querySelector(".video-course-program__item");
+        if (other !== video) pauseVideo(other);
       });
-      video.play();
-      updateButtons();
-      showControls();
-    });
-    pauseBtn.addEventListener("click", () => {
-      pauseVideo(video);
-      updateButtons();
-      showControls();
-    });
-    video.addEventListener("play", () => {
-      videos.forEach((vb) => {
-        const otherVideo = vb.querySelector(".video-course-program__item");
-        if (otherVideo !== video) pauseVideo(otherVideo);
-      });
-      updateButtons();
-    });
-    video.addEventListener("pause", updateButtons);
+    }
+    function showControls() {
+      clearTimeout(hideTimeout);
+      nav.classList.remove("hidden");
+    }
+    function hideControls(delay = 0) {
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        if (video.paused) return;
+        if (controlsLocked) return;
+        nav.classList.add("hidden");
+      }, delay);
+    }
     function updateButtons() {
       if (video.paused) {
         playBtn.style.display = "block";
         pauseBtn.style.display = "none";
-        nav.classList.remove("hidden");
+        showControls();
       } else {
         playBtn.style.display = "none";
         pauseBtn.style.display = "block";
       }
     }
+    function handleFullscreenControls() {
+      if (document.fullscreenElement !== videoBlock) return;
+      showControls();
+      hideControls(2e3);
+    }
+    playBtn.addEventListener("click", () => {
+      controlsLocked = false;
+      pauseOtherVideos();
+      video.play();
+      updateButtons();
+      if (isMobile()) {
+        hideControls(200);
+      }
+    });
+    pauseBtn.addEventListener("click", () => {
+      video.pause();
+      updateButtons();
+    });
+    video.addEventListener("play", () => {
+      pauseOtherVideos();
+      updateButtons();
+      if (isMobile()) {
+        if (justTapped) {
+          justTapped = false;
+          return;
+        }
+        if (!controlsLocked) hideControls(200);
+      } else if (document.fullscreenElement === videoBlock) {
+        hideControls(2e3);
+      } else {
+        hideControls();
+      }
+    });
+    video.addEventListener("pause", () => {
+      updateButtons();
+      controlsLocked = false;
+      justTapped = false;
+      clearTimeout(hideTimeout);
+      showControls();
+    });
     muteBtn.addEventListener("click", () => {
       video.muted = !video.muted;
       muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
     });
+    if (!isMobile()) {
+      videoBlock.addEventListener("mouseenter", showControls);
+      videoBlock.addEventListener("mouseleave", () => {
+        if (!video.paused && document.fullscreenElement !== videoBlock) {
+          hideControls();
+        }
+      });
+      videoBlock.addEventListener("mousemove", () => {
+        if (document.fullscreenElement === videoBlock) {
+          handleFullscreenControls();
+        }
+      });
+    }
+    if (isMobile()) {
+      videoBlock.addEventListener("touchstart", () => {
+        clearTimeout(hideTimeout);
+        if (nav.classList.contains("hidden")) {
+          controlsLocked = false;
+          justTapped = true;
+          showControls();
+        } else {
+          controlsLocked = true;
+          justTapped = true;
+          showControls();
+        }
+      });
+    }
     fullscreenBtn.addEventListener("click", () => {
-      if (document.fullscreenElement === videoBlock) document.exitFullscreen();
-      else videoBlock.requestFullscreen?.();
-    });
-    videoBlock.addEventListener("mouseenter", showControls);
-    videoBlock.addEventListener("mousemove", showControls);
-    videoBlock.addEventListener("mouseleave", hideControls);
-    videoBlock.addEventListener("touchstart", () => {
-      if (nav.classList.contains("hidden")) showControls();
-      else if (!video.paused) nav.classList.add("hidden");
+      if (document.fullscreenElement === videoBlock) {
+        document.exitFullscreen();
+      } else {
+        videoBlock.requestFullscreen?.();
+      }
     });
     document.addEventListener("fullscreenchange", () => {
       if (document.fullscreenElement === videoBlock) {
-        fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg";
+        fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg");
         video.style.objectFit = "contain";
-        hideTimeout = setTimeout(() => nav.classList.add("hidden"), 2e3);
+        showControls();
+        hideControls(2e3);
       } else {
-        fullscreenIcon.src = "assets/img/icons/fullscreen.svg";
+        fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
         video.style.objectFit = "cover";
-        nav.classList.remove("hidden");
-        clearTimeout(hideTimeout);
+        showControls();
       }
     });
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) pauseVideo(entry.target);
+        if (!entry.isIntersecting) {
+          pauseVideo(entry.target);
+        }
       });
     }, { threshold: 0.25 });
     observer.observe(video);
@@ -277,15 +403,15 @@ document.addEventListener("DOMContentLoaded", () => {
 		<div class="gallery-viewer__overlay"></div>
 
 		<button class="gallery-viewer__close">
-			<img src="assets/img/icons/close.svg" alt="Close">
+			<img src="/assets/img/icons/close.svg" alt="Close">
 		</button>
 
 		<div class="gallery-viewer__content">
 			<img class="gallery-viewer__image" src="">
 			<div class="gallery-viewer__controls">
-				<button class="gallery-viewer__prev"><img src="assets/img/icons/arrow-slider.svg" alt="Image"></button>
+				<button class="gallery-viewer__prev"><img src="/assets/img/icons/arrow-slider.svg" alt="Image"></button>
 				<div class="gallery-viewer__dots"></div>
-				<button class="gallery-viewer__next"><img src="assets/img/icons/arrow-slider.svg" alt="Image"></button>
+				<button class="gallery-viewer__next"><img src="/assets/img/icons/arrow-slider.svg" alt="Image"></button>
 			</div>
 		</div>
 	`;
