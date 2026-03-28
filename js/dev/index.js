@@ -243,20 +243,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const fullscreenIcon = fullscreenBtn?.querySelector("img");
     const muteIcon = muteBtn?.querySelector("img");
     let hideTimeout;
-    let controlsLocked = false;
     video.muted = true;
     video.autoplay = false;
     pauseBtn.style.display = "none";
-    nav.classList.add("hidden");
+    nav.classList.remove("hidden");
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
       video.controls = true;
       nav.style.display = "none";
     }
     function pauseVideo(v) {
       if (!v) return;
-      if (v.tagName === "VIDEO") {
-        if (!v.paused) v.pause();
-      }
+      if (v.tagName === "VIDEO" && !v.paused) v.pause();
     }
     function pauseOtherVideos() {
       videos.forEach((vb) => {
@@ -268,11 +265,10 @@ document.addEventListener("DOMContentLoaded", () => {
       clearTimeout(hideTimeout);
       nav.classList.remove("hidden");
     }
-    function hideControls(delay = 0) {
+    function hideControls(delay = 1e3) {
       clearTimeout(hideTimeout);
       hideTimeout = setTimeout(() => {
         if (video.paused) return;
-        if (controlsLocked) return;
         nav.classList.add("hidden");
       }, delay);
     }
@@ -286,54 +282,61 @@ document.addEventListener("DOMContentLoaded", () => {
         pauseBtn.style.display = "block";
       }
     }
-    playBtn.addEventListener("click", () => {
-      controlsLocked = false;
+    video.addEventListener("click", () => {
+      if (video.paused) {
+        pauseOtherVideos();
+        video.play();
+        showControls();
+        hideControls(1e3);
+      } else {
+        video.pause();
+      }
+    });
+    playBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       pauseOtherVideos();
       video.play();
-      updateButtons();
-      if (isMobile()) {
-        hideControls(0);
-      }
-    });
-    pauseBtn.addEventListener("click", () => {
-      video.pause();
-      updateButtons();
       showControls();
-      controlsLocked = true;
+      hideControls(1e3);
+    });
+    pauseBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      video.pause();
     });
     video.addEventListener("play", () => {
-      pauseOtherVideos();
       updateButtons();
-      if (isMobile()) {
-        if (!controlsLocked) hideControls(0);
-      } else if (document.fullscreenElement === videoBlock) {
-        hideControls(2e3);
-      } else {
-        hideControls();
-      }
+      hideControls();
     });
     video.addEventListener("pause", () => {
       updateButtons();
       showControls();
-      controlsLocked = true;
-      clearTimeout(hideTimeout);
     });
     if (isMobile()) {
       videoBlock.addEventListener("touchstart", () => {
+        showControls();
+        hideControls();
+      });
+    }
+    if (!isMobile()) {
+      videoBlock.addEventListener("mousemove", () => {
+        showControls();
+        hideControls();
+      });
+      videoBlock.addEventListener("mouseleave", () => {
         if (!video.paused) {
-          showControls();
-          controlsLocked = true;
-          clearTimeout(hideTimeout);
+          hideControls(500);
         }
       });
     }
-    muteBtn.addEventListener("click", () => {
+    muteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       video.muted = !video.muted;
       if (muteIcon) {
         muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
       }
     });
-    fullscreenBtn.addEventListener("click", () => {
+    fullscreenBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       if (document.fullscreenElement === videoBlock) {
         document.exitFullscreen();
       } else {
@@ -345,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg");
         video.style.objectFit = "contain";
         showControls();
-        hideControls(2e3);
+        hideControls();
       } else {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
         video.style.objectFit = "cover";
@@ -358,19 +361,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }, { threshold: 0.25 });
     observer.observe(video);
-    if (!isMobile()) {
-      videoBlock.addEventListener("mouseenter", showControls);
-      videoBlock.addEventListener("mouseleave", () => {
-        if (!video.paused && document.fullscreenElement !== videoBlock) {
-          hideControls();
-        }
-      });
-      videoBlock.addEventListener("mousemove", () => {
-        if (document.fullscreenElement === videoBlock) {
-          showControls();
-        }
-      });
-    }
   });
 });
 document.addEventListener("DOMContentLoaded", () => {
