@@ -73,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let hideTimeout;
   let controlsLocked = false;
   video.muted = true;
+  video.autoplay = true;
   if (pauseBtn) pauseBtn.style.display = "none";
   nav?.classList.add("hidden");
   function pauseVideo(v) {
@@ -106,7 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (video.paused) {
       playBtn.style.display = "block";
       pauseBtn.style.display = "none";
-      showControls();
     } else {
       playBtn.style.display = "none";
       pauseBtn.style.display = "block";
@@ -123,7 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     video.play();
     updateButtons();
-    if (isMobile()) hideControls(0);
+    if (isMobile()) {
+      hideControls(0);
+    }
   });
   pauseBtn?.addEventListener("click", () => {
     video.pause();
@@ -145,9 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   video.addEventListener("pause", () => {
     updateButtons();
-    clearTimeout(hideTimeout);
     showControls();
     controlsLocked = true;
+    clearTimeout(hideTimeout);
   });
   muteBtn?.addEventListener("click", () => {
     video.muted = !video.muted;
@@ -158,18 +160,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!isMobile()) {
     videoBlock.addEventListener("mouseenter", showControls);
     videoBlock.addEventListener("mouseleave", () => {
-      if (!video.paused && document.fullscreenElement !== videoBlock) hideControls();
+      if (!video.paused && document.fullscreenElement !== videoBlock) {
+        hideControls();
+      }
     });
     videoBlock.addEventListener("mousemove", () => {
-      if (document.fullscreenElement === videoBlock) handleFullscreenControls();
+      if (document.fullscreenElement === videoBlock) {
+        handleFullscreenControls();
+      }
     });
   }
   if (isMobile()) {
     videoBlock.addEventListener("touchstart", () => {
-      if (video.paused) return;
-      showControls();
-      controlsLocked = true;
-      clearTimeout(hideTimeout);
+      if (!video.paused) {
+        showControls();
+        controlsLocked = true;
+        clearTimeout(hideTimeout);
+      }
     });
   }
   fullscreenBtn?.addEventListener("click", () => {
@@ -193,7 +200,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) pauseVideo(entry.target);
+      if (!entry.isIntersecting) {
+        pauseVideo(entry.target);
+      }
     });
   }, { threshold: 0.25 });
   observer.observe(video);
@@ -236,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let hideTimeout;
     let controlsLocked = false;
     video.muted = true;
+    video.autoplay = false;
     pauseBtn.style.display = "none";
     nav.classList.add("hidden");
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
@@ -246,11 +256,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!v) return;
       if (v.tagName === "VIDEO") {
         if (!v.paused) v.pause();
-      } else if (v.tagName === "IFRAME") {
-        v.contentWindow?.postMessage(JSON.stringify({
-          event: "command",
-          func: "pauseVideo"
-        }), "*");
       }
     }
     function pauseOtherVideos() {
@@ -286,7 +291,9 @@ document.addEventListener("DOMContentLoaded", () => {
       pauseOtherVideos();
       video.play();
       updateButtons();
-      if (isMobile()) hideControls(0);
+      if (isMobile()) {
+        hideControls(0);
+      }
     });
     pauseBtn.addEventListener("click", () => {
       video.pause();
@@ -307,16 +314,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     video.addEventListener("pause", () => {
       updateButtons();
-      clearTimeout(hideTimeout);
       showControls();
       controlsLocked = true;
+      clearTimeout(hideTimeout);
     });
     if (isMobile()) {
       videoBlock.addEventListener("touchstart", () => {
-        if (video.paused) return;
-        showControls();
-        controlsLocked = true;
-        clearTimeout(hideTimeout);
+        if (!video.paused) {
+          showControls();
+          controlsLocked = true;
+          clearTimeout(hideTimeout);
+        }
       });
     }
     muteBtn.addEventListener("click", () => {
@@ -353,10 +361,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isMobile()) {
       videoBlock.addEventListener("mouseenter", showControls);
       videoBlock.addEventListener("mouseleave", () => {
-        if (!video.paused && document.fullscreenElement !== videoBlock) hideControls();
+        if (!video.paused && document.fullscreenElement !== videoBlock) {
+          hideControls();
+        }
       });
       videoBlock.addEventListener("mousemove", () => {
-        if (document.fullscreenElement === videoBlock) showControls();
+        if (document.fullscreenElement === videoBlock) {
+          showControls();
+        }
       });
     }
   });
