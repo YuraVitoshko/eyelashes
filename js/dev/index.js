@@ -115,30 +115,33 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleFullscreenControls() {
     if (document.fullscreenElement !== videoBlock) return;
     showControls();
-    hideControls(2e3);
+    hideControls(1e3);
   }
-  playBtn?.addEventListener("click", () => {
+  playBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
     controlsLocked = false;
     pauseYoutubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     video.play();
     updateButtons();
-    if (isMobile()) {
-      hideControls(0);
-    }
+    showControls();
+    hideControls(1e3);
+    setTimeout(() => false, 300);
   });
-  pauseBtn?.addEventListener("click", () => {
+  pauseBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
     video.pause();
     updateButtons();
     showControls();
     controlsLocked = true;
+    setTimeout(() => false, 300);
   });
   video.addEventListener("play", () => {
     pauseYoutubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     updateButtons();
     if (isMobile()) {
-      if (!controlsLocked) hideControls(0);
+      if (!controlsLocked) hideControls(1e3);
     } else if (document.fullscreenElement === videoBlock) {
       hideControls(2e3);
     } else {
@@ -151,7 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
     controlsLocked = true;
     clearTimeout(hideTimeout);
   });
-  muteBtn?.addEventListener("click", () => {
+  muteBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
     video.muted = !video.muted;
     if (muteIcon) {
       muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
@@ -179,7 +183,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  fullscreenBtn?.addEventListener("click", () => {
+  fullscreenBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
     if (document.fullscreenElement === videoBlock) {
       document.exitFullscreen();
     } else {
@@ -191,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg");
       video.style.objectFit = "contain";
       showControls();
-      hideControls(2e3);
+      hideControls(1e3);
     } else {
       fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
       video.style.objectFit = "cover";
@@ -243,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const fullscreenIcon = fullscreenBtn?.querySelector("img");
     const muteIcon = muteBtn?.querySelector("img");
     let hideTimeout;
-    let ignoreClick = false;
+    let playedByButton = false;
     video.muted = true;
     video.autoplay = false;
     pauseBtn.style.display = "none";
@@ -252,28 +257,28 @@ document.addEventListener("DOMContentLoaded", () => {
       video.controls = true;
       nav.style.display = "none";
     }
-    function pauseVideo(v) {
-      if (!v) return;
-      if (v.tagName === "VIDEO" && !v.paused) v.pause();
-    }
-    function pauseOtherVideos() {
-      videos.forEach((vb) => {
-        const other = vb.querySelector(".video-course-program__item");
-        if (other !== video) pauseVideo(other);
-      });
-    }
-    function showControls() {
+    const pauseVideo = (v) => {
+      if (v && v.tagName === "VIDEO" && !v.paused) v.pause();
+    };
+    const pauseOtherVideos = () => videos.forEach((vb) => {
+      const other = vb.querySelector(".video-course-program__item");
+      if (other !== video) pauseVideo(other);
+    });
+    const showControls = () => {
       clearTimeout(hideTimeout);
       nav.classList.remove("hidden");
-    }
-    function hideControls(delay = 2e3) {
+      nav.style.transition = "opacity 0.2s";
+      nav.style.opacity = "1";
+    };
+    const hideControls = (delay = 200) => {
       clearTimeout(hideTimeout);
       hideTimeout = setTimeout(() => {
         if (video.paused) return;
-        nav.classList.add("hidden");
+        nav.style.transition = "opacity 0.2s";
+        nav.style.opacity = "0";
       }, delay);
-    }
-    function updateButtons() {
+    };
+    const updateButtons = () => {
       if (video.paused) {
         playBtn.style.display = "block";
         pauseBtn.style.display = "none";
@@ -282,42 +287,28 @@ document.addEventListener("DOMContentLoaded", () => {
         playBtn.style.display = "none";
         pauseBtn.style.display = "block";
       }
-    }
-    if (!isMobile()) {
-      video.addEventListener("click", () => {
-        if (ignoreClick) return;
-        if (video.paused) {
-          pauseOtherVideos();
-          video.play();
-        } else {
-          video.pause();
-        }
-      });
-    }
-    if (isMobile()) {
-      videoBlock.addEventListener("touchstart", () => {
-        showControls();
-        hideControls();
-      });
-    }
+    };
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      ignoreClick = true;
+      playedByButton = true;
       pauseOtherVideos();
       video.play();
       showControls();
-      hideControls(1e3);
-      setTimeout(() => ignoreClick = false, 300);
+      setTimeout(() => false, 300);
     });
     pauseBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      ignoreClick = true;
       video.pause();
-      setTimeout(() => ignoreClick = false, 300);
+      setTimeout(() => false, 300);
     });
     video.addEventListener("play", () => {
       updateButtons();
-      hideControls();
+      if (playedByButton) {
+        hideControls(1e3);
+        playedByButton = false;
+      } else {
+        hideControls(100);
+      }
     });
     video.addEventListener("pause", () => {
       updateButtons();
@@ -326,18 +317,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isMobile()) {
       videoBlock.addEventListener("mousemove", () => {
         showControls();
-        hideControls();
+        hideControls(1500);
       });
       videoBlock.addEventListener("mouseleave", () => {
-        if (!video.paused) hideControls(500);
+        if (!video.paused) hideControls(200);
+      });
+    }
+    if (isMobile()) {
+      videoBlock.addEventListener("touchstart", () => {
+        showControls();
+        hideControls(1500);
       });
     }
     muteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       video.muted = !video.muted;
-      if (muteIcon) {
-        muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
-      }
+      if (muteIcon) muteIcon.src = video.muted ? "assets/img/icons/sound-off.svg" : "assets/img/icons/sound-on.svg";
     });
     fullscreenBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -352,19 +347,13 @@ document.addEventListener("DOMContentLoaded", () => {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg");
         video.style.objectFit = "contain";
         showControls();
-        hideControls();
+        hideControls(1e3);
       } else {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
         video.style.objectFit = "cover";
         showControls();
       }
     });
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) pauseVideo(entry.target);
-      });
-    }, { threshold: 0.25 });
-    observer.observe(video);
   });
 });
 document.addEventListener("DOMContentLoaded", () => {
