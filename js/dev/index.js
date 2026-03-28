@@ -82,9 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (isIOS) {
     video.controls = true;
     nav.style.display = "none";
-  } else if (isAndroid) {
-    video.controls = false;
-    nav.style.display = "flex";
   } else {
     video.controls = false;
     nav.style.display = "flex";
@@ -102,7 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
     nav.style.transition = "opacity 0.2s";
   };
   const hideControls = (delay = 1e3) => {
-    if (isAndroid && controlsLocked) return;
+    const isFullscreen = document.fullscreenElement === videoBlock;
+    if (isAndroid && controlsLocked && !isFullscreen) return;
     clearTimeout(hideTimeout);
     hideTimeout = setTimeout(() => {
       if (video.paused) return;
@@ -123,13 +121,17 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   playBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
+    const isFullscreen = document.fullscreenElement === videoBlock;
     controlsLocked = false;
     pauseYoutubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     video.play();
     updateButtons();
-    if (!isAndroid) hideControls(1e3);
-    else hideControls(1e3);
+    if (isAndroid && isFullscreen) {
+      hideControls(500);
+    } else {
+      hideControls(1e3);
+    }
   });
   pauseBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -142,8 +144,12 @@ document.addEventListener("DOMContentLoaded", () => {
     pauseYoutubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     updateButtons();
-    if (!isAndroid) hideControls(1e3);
-    else hideControls(1e3);
+    const isFullscreen = document.fullscreenElement === videoBlock;
+    if (isAndroid && isFullscreen) {
+      hideControls(500);
+    } else {
+      hideControls(1e3);
+    }
   });
   video.addEventListener("pause", () => {
     updateButtons();
@@ -250,6 +256,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isIOS) {
       video.controls = true;
       nav.style.display = "none";
+    } else {
+      video.controls = false;
+      nav.style.display = "flex";
     }
     const pauseOtherVideos = () => {
       videos.forEach((vb) => {
@@ -257,23 +266,29 @@ document.addEventListener("DOMContentLoaded", () => {
         if (other !== video && !other.paused) other.pause();
       });
     };
-    const toggleControls = (show = true, delay = 0) => {
+    const showControls = () => {
       clearTimeout(hideTimeout);
-      if (show) {
-        nav.classList.remove("hidden");
-        nav.style.opacity = "1";
-        nav.style.transition = "opacity 0.2s";
-      } else {
-        hideTimeout = setTimeout(() => {
-          if (!video.paused && !(isAndroid && controlsLocked)) nav.style.opacity = "0";
-        }, delay);
-      }
+      nav?.classList.remove("hidden");
+      nav.style.opacity = "1";
+      nav.style.transition = "opacity 0.2s";
+    };
+    const hideControls = (delay = 1e3) => {
+      const isFullscreen = document.fullscreenElement === videoBlock;
+      if (isAndroid && controlsLocked && !isFullscreen) return;
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        if (!video.paused) {
+          nav?.classList.add("hidden");
+          nav.style.opacity = "0";
+        }
+      }, delay);
     };
     const updateButtons = () => {
+      if (!playBtn || !pauseBtn) return;
       if (video.paused) {
         playBtn.style.display = "block";
         pauseBtn.style.display = "none";
-        toggleControls(true);
+        showControls();
       } else {
         playBtn.style.display = "none";
         pauseBtn.style.display = "block";
@@ -282,21 +297,33 @@ document.addEventListener("DOMContentLoaded", () => {
     video.addEventListener("play", () => {
       pauseOtherVideos();
       updateButtons();
-      if (isAndroid) hideControls(1e3);
-      else toggleControls(false, 1e3);
+      const isFullscreen = document.fullscreenElement === videoBlock;
+      if (isAndroid && isFullscreen) {
+        hideControls(500);
+      } else if (!isAndroid) {
+        hideControls(1e3);
+      }
     });
     video.addEventListener("pause", () => {
       updateButtons();
-      toggleControls(true);
+      showControls();
       if (isAndroid) controlsLocked = true;
       clearTimeout(hideTimeout);
     });
     playBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
+      const isFullscreen = document.fullscreenElement === videoBlock;
       controlsLocked = false;
       pauseOtherVideos();
       video.play();
-      toggleControls(true);
+      updateButtons();
+      if (isAndroid && isFullscreen) {
+        hideControls(500);
+      } else if (!isAndroid && isFullscreen) {
+        hideControls(1e3);
+      } else {
+        showControls();
+      }
     });
     pauseBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -316,22 +343,23 @@ document.addEventListener("DOMContentLoaded", () => {
       if (document.fullscreenElement === videoBlock) {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg");
         video.style.objectFit = "contain";
-        toggleControls(true, 1e3);
+        showControls();
+        hideControls(1e3);
         if (isAndroid) {
-          const adjustAndroidVideo = () => {
+          const adjustVideoSize = () => {
             video.style.width = window.innerWidth + "px";
             video.style.height = window.innerHeight + "px";
           };
-          adjustAndroidVideo();
-          window.addEventListener("resize", adjustAndroidVideo);
-          videoBlock._androidResizeHandler = adjustAndroidVideo;
+          adjustVideoSize();
+          window.addEventListener("resize", adjustVideoSize);
+          videoBlock._androidResizeHandler = adjustVideoSize;
         }
       } else {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
         video.style.objectFit = "cover";
         video.style.width = "";
         video.style.height = "";
-        toggleControls(true);
+        showControls();
         if (isAndroid && videoBlock._androidResizeHandler) {
           window.removeEventListener("resize", videoBlock._androidResizeHandler);
           delete videoBlock._androidResizeHandler;
@@ -339,26 +367,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     if (!isMobile()) {
-      videoBlock.addEventListener("mousemove", () => toggleControls(true, 1500));
+      videoBlock.addEventListener("mousemove", () => {
+        showControls();
+        hideControls(500);
+      });
       videoBlock.addEventListener("mouseleave", () => {
-        if (!video.paused) toggleControls(false, 200);
+        if (!video.paused) hideControls(200);
       });
     } else if (isAndroid) {
       videoBlock.addEventListener("touchstart", () => {
         if (!video.paused) {
-          toggleControls(true);
+          showControls();
           controlsLocked = true;
           clearTimeout(hideTimeout);
         }
       });
     } else {
-      videoBlock.addEventListener("touchstart", () => toggleControls(true, 1500));
-    }
-    function hideControls(delay = 1e3) {
-      clearTimeout(hideTimeout);
-      hideTimeout = setTimeout(() => {
-        if (!video.paused && !(isAndroid && controlsLocked)) nav.style.opacity = "0";
-      }, delay);
+      videoBlock.addEventListener("touchstart", () => showControls());
     }
   });
 });
