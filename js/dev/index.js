@@ -1,5 +1,7 @@
 import "./main.min.js";
 import { d as dataMediaQueries, s as slideToggle, a as slideUp, b as slideDown, g as getDigFormat, u as uniqArray } from "./common.min.js";
+document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("selectstart", (e) => e.preventDefault());
 document.addEventListener("DOMContentLoaded", () => {
   const button = document.querySelector(".actions-menu__button");
   button.addEventListener("touchstart", () => {
@@ -160,10 +162,25 @@ document.addEventListener("DOMContentLoaded", () => {
       video.style.objectFit = "contain";
       showControls();
       hideControls(1e3);
+      if (isAndroid) {
+        const adjustVideoSize = () => {
+          video.style.width = window.innerWidth + "px";
+          video.style.height = window.innerHeight + "px";
+        };
+        adjustVideoSize();
+        window.addEventListener("resize", adjustVideoSize);
+        videoBlock._androidResizeHandler = adjustVideoSize;
+      }
     } else {
       fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
       video.style.objectFit = "cover";
+      video.style.width = "";
+      video.style.height = "";
       showControls();
+      if (isAndroid && videoBlock._androidResizeHandler) {
+        window.removeEventListener("resize", videoBlock._androidResizeHandler);
+        delete videoBlock._androidResizeHandler;
+      }
     }
   });
   if (!isMobile()) {
@@ -301,10 +318,23 @@ document.addEventListener("DOMContentLoaded", () => {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen-exit.svg");
         video.style.objectFit = "contain";
         toggleControls(true, 1e3);
+        if (isAndroid) {
+          const adjustAndroidVideo2 = () => {
+            video.style.width = window.innerWidth + "px";
+            video.style.height = window.innerHeight + "px";
+          };
+          adjustAndroidVideo2();
+          window.addEventListener("resize", adjustAndroidVideo2);
+        }
       } else {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
         video.style.objectFit = "cover";
+        video.style.width = "";
+        video.style.height = "";
         toggleControls(true);
+        if (isAndroid) {
+          window.removeEventListener("resize", adjustAndroidVideo);
+        }
       }
     });
     if (!isMobile()) {
