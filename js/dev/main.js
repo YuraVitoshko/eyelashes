@@ -1,4 +1,4 @@
-import { c as bodyLockToggle, e as bodyLockStatus } from "./common.min.js";
+import { c as bodyLockToggle$1, e as bodyLockStatus } from "./common.min.js";
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) return;
@@ -31,7 +31,7 @@ import { c as bodyLockToggle, e as bodyLockStatus } from "./common.min.js";
 function menuInit() {
   document.addEventListener("click", function(e) {
     if (bodyLockStatus && e.target.closest("[data-fls-menu]")) {
-      bodyLockToggle();
+      bodyLockToggle$1();
       document.documentElement.toggleAttribute("data-fls-menu-open");
     }
   });
@@ -56,17 +56,21 @@ document.addEventListener("DOMContentLoaded", () => {
     lastScroll = currentScroll;
   });
 });
-document.addEventListener("DOMContentLoaded", () => {
-  const menuLinks = document.querySelectorAll(".menu__link");
-  menuLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      const html = document.documentElement;
-      const body = document.body;
-      html.removeAttribute("data-fls-menu-open");
-      html.removeAttribute("data-fls-scrolllock");
-      body.style.overflow = "";
-      body.style.height = "";
-      body.style.paddingRight = "";
+document.querySelectorAll(".menu__link").forEach((link) => {
+  link.addEventListener("click", function(e) {
+    const targetSelector = this.getAttribute("href");
+    if (!targetSelector || targetSelector === "#") return;
+    const target = document.querySelector(targetSelector);
+    if (!target) return;
+    e.preventDefault();
+    if (document.documentElement.hasAttribute("data-fls-menu-open")) {
+      bodyLockToggle();
+      document.documentElement.removeAttribute("data-fls-menu-open");
+    }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        smoothScrollTo(target, 1200);
+      });
     });
   });
 });

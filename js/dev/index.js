@@ -3,6 +3,44 @@ import { d as dataMediaQueries, s as slideToggle, a as slideUp, b as slideDown, 
 document.addEventListener("contextmenu", (e) => e.preventDefault());
 document.addEventListener("selectstart", (e) => e.preventDefault());
 document.addEventListener("DOMContentLoaded", () => {
+  const smoothScrollTo = (target, duration = 1200) => {
+    const start = window.pageYOffset;
+    const end = target.getBoundingClientRect().top + start;
+    const distance = end - start;
+    let startTime = null;
+    const easeInOut = (t) => {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    };
+    const animation = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const time = currentTime - startTime;
+      const progress = Math.min(time / duration, 1);
+      window.scrollTo(0, start + distance * easeInOut(progress));
+      if (time < duration) {
+        requestAnimationFrame(animation);
+      }
+    };
+    requestAnimationFrame(animation);
+  };
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", function(e) {
+      const targetSelector = this.getAttribute("href");
+      if (targetSelector === "#") return;
+      const target = document.querySelector(targetSelector);
+      if (!target) return;
+      e.preventDefault();
+      smoothScrollTo(target, 1500);
+      const html = document.documentElement;
+      const body = document.body;
+      html.removeAttribute("data-fls-menu-open");
+      html.removeAttribute("data-fls-scrolllock");
+      body.style.overflow = "";
+      body.style.height = "";
+      body.style.paddingRight = "";
+    });
+  });
+});
+document.addEventListener("DOMContentLoaded", () => {
   const button = document.querySelector(".actions-menu__button");
   button.addEventListener("touchstart", () => {
     const html = document.documentElement;
