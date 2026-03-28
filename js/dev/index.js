@@ -72,13 +72,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const muteBtn = videoBlock.querySelector(".nav-video__btn-mute");
   const muteIcon = muteBtn?.querySelector("img");
   const isMobile = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const isAndroid = /Android/i.test(navigator.userAgent);
   let hideTimeout;
   let controlsLocked = false;
   video.muted = true;
   video.autoplay = true;
   pauseBtn.style.display = "none";
-  if (isAndroid) {
+  if (isIOS) {
+    video.controls = true;
+    nav.style.display = "none";
+  } else if (isAndroid) {
+    video.controls = false;
+    nav.style.display = "flex";
+  } else {
     video.controls = false;
     nav.style.display = "flex";
   }
@@ -189,8 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     videoBlock.addEventListener("mouseleave", () => {
       if (!video.paused) hideControls(200);
     });
-  }
-  if (isAndroid) {
+  } else if (isAndroid) {
     videoBlock.addEventListener("touchstart", () => {
       if (!video.paused) {
         showControls();
@@ -199,13 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) pauseVideo(entry.target);
-    });
-  }, { threshold: 0.25 });
-  observer.observe(video);
-  youtubeVideos.forEach((v) => observer.observe(v));
 });
 document.addEventListener("DOMContentLoaded", () => {
   const items = document.querySelectorAll(".what-will-you-get__item");
