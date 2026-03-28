@@ -72,17 +72,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const muteBtn = videoBlock.querySelector(".nav-video__btn-mute");
   const muteIcon = muteBtn?.querySelector("img");
   const isMobile = () => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const isAndroid = /Android/i.test(navigator.userAgent);
   let hideTimeout;
   let controlsLocked = false;
-  let playedByButton = false;
   video.muted = true;
   video.autoplay = true;
   pauseBtn.style.display = "none";
-  if (isIOS || isAndroid) {
-    video.controls = true;
-    nav.style.display = "none";
+  if (isAndroid) {
+    video.controls = false;
+    nav.style.display = "flex";
   }
   const pauseVideo = (v) => {
     if (!v) return;
@@ -97,9 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
     nav.style.transition = "opacity 0.2s";
   };
   const hideControls = (delay = 1e3) => {
+    if (isAndroid && controlsLocked) return;
     clearTimeout(hideTimeout);
     hideTimeout = setTimeout(() => {
-      if (video.paused || controlsLocked) return;
+      if (video.paused) return;
       nav?.classList.add("hidden");
       nav.style.opacity = "0";
     }, delay);
@@ -117,33 +116,32 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   playBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
-    playedByButton = true;
     controlsLocked = false;
     pauseYoutubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     video.play();
     updateButtons();
-    showControls();
-    hideControls(1e3);
+    if (!isAndroid) hideControls(1e3);
+    else hideControls(1e3);
   });
   pauseBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
     video.pause();
     updateButtons();
     showControls();
-    controlsLocked = true;
+    if (isAndroid) controlsLocked = true;
   });
   video.addEventListener("play", () => {
     pauseYoutubeVideos();
     document.querySelectorAll(".video-course-program__item").forEach((v) => pauseVideo(v));
     updateButtons();
-    if (!isMobile() || playedByButton) hideControls(1e3);
-    playedByButton = false;
+    if (!isAndroid) hideControls(1e3);
+    else hideControls(1e3);
   });
   video.addEventListener("pause", () => {
     updateButtons();
     showControls();
-    controlsLocked = true;
+    if (isAndroid) controlsLocked = true;
     clearTimeout(hideTimeout);
   });
   muteBtn?.addEventListener("click", (e) => {
@@ -192,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!video.paused) hideControls(200);
     });
   }
-  if (isMobile() && !isIOS) {
+  if (isAndroid) {
     videoBlock.addEventListener("touchstart", () => {
       if (!video.paused) {
         showControls();
@@ -246,11 +244,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const fullscreenIcon = fullscreenBtn?.querySelector("img");
     const muteIcon = muteBtn?.querySelector("img");
     let hideTimeout;
-    let playedByButton = false;
+    let controlsLocked = false;
     video.muted = true;
     video.autoplay = false;
     pauseBtn.style.display = "none";
-    if (isIOS || isAndroid) {
+    if (isIOS) {
       video.controls = true;
       nav.style.display = "none";
     }
@@ -268,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nav.style.transition = "opacity 0.2s";
       } else {
         hideTimeout = setTimeout(() => {
-          if (!video.paused) nav.style.opacity = "0";
+          if (!video.paused && !(isAndroid && controlsLocked)) nav.style.opacity = "0";
         }, delay);
       }
     };
@@ -285,13 +283,18 @@ document.addEventListener("DOMContentLoaded", () => {
     video.addEventListener("play", () => {
       pauseOtherVideos();
       updateButtons();
-      toggleControls(true, playedByButton ? 1e3 : 100);
-      playedByButton = false;
+      if (isAndroid) hideControls(1e3);
+      else toggleControls(false, 1e3);
     });
-    video.addEventListener("pause", updateButtons);
+    video.addEventListener("pause", () => {
+      updateButtons();
+      toggleControls(true);
+      if (isAndroid) controlsLocked = true;
+      clearTimeout(hideTimeout);
+    });
     playBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
-      playedByButton = true;
+      controlsLocked = false;
       pauseOtherVideos();
       video.play();
       toggleControls(true);
@@ -307,11 +310,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     fullscreenBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (document.fullscreenElement === videoBlock) {
-        document.exitFullscreen();
-      } else {
-        videoBlock.requestFullscreen?.();
-      }
+      if (document.fullscreenElement === videoBlock) document.exitFullscreen();
+      else videoBlock.requestFullscreen?.();
     });
     document.addEventListener("fullscreenchange", () => {
       if (document.fullscreenElement === videoBlock) {
@@ -319,12 +319,13 @@ document.addEventListener("DOMContentLoaded", () => {
         video.style.objectFit = "contain";
         toggleControls(true, 1e3);
         if (isAndroid) {
-          const adjustAndroidVideo2 = () => {
+          const adjustAndroidVideo = () => {
             video.style.width = window.innerWidth + "px";
             video.style.height = window.innerHeight + "px";
           };
-          adjustAndroidVideo2();
-          window.addEventListener("resize", adjustAndroidVideo2);
+          adjustAndroidVideo();
+          window.addEventListener("resize", adjustAndroidVideo);
+          videoBlock._androidResizeHandler = adjustAndroidVideo;
         }
       } else {
         fullscreenIcon && (fullscreenIcon.src = "assets/img/icons/fullscreen.svg");
@@ -332,8 +333,9 @@ document.addEventListener("DOMContentLoaded", () => {
         video.style.width = "";
         video.style.height = "";
         toggleControls(true);
-        if (isAndroid) {
-          window.removeEventListener("resize", adjustAndroidVideo);
+        if (isAndroid && videoBlock._androidResizeHandler) {
+          window.removeEventListener("resize", videoBlock._androidResizeHandler);
+          delete videoBlock._androidResizeHandler;
         }
       }
     });
@@ -342,8 +344,22 @@ document.addEventListener("DOMContentLoaded", () => {
       videoBlock.addEventListener("mouseleave", () => {
         if (!video.paused) toggleControls(false, 200);
       });
+    } else if (isAndroid) {
+      videoBlock.addEventListener("touchstart", () => {
+        if (!video.paused) {
+          toggleControls(true);
+          controlsLocked = true;
+          clearTimeout(hideTimeout);
+        }
+      });
     } else {
       videoBlock.addEventListener("touchstart", () => toggleControls(true, 1500));
+    }
+    function hideControls(delay = 1e3) {
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        if (!video.paused && !(isAndroid && controlsLocked)) nav.style.opacity = "0";
+      }, delay);
     }
   });
 });
